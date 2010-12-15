@@ -12,6 +12,9 @@ namespace itk
   namespace simple
   {
 
+  class DelayedExecute;
+
+
     class Image : public LightObject {
     public:
       typedef Image              Self;
@@ -32,6 +35,10 @@ namespace itk
       // assign to auto pointer
       m_PimpleImage.reset( new PimpleImage<TImageType>( image ) );
     }
+
+      Image( const DelayedExecute &exec )
+        {
+        }
 
       itk::DataObject::Pointer GetImageBase( void );
       itk::DataObject::ConstPointer GetImageBase( void ) const;
@@ -156,6 +163,29 @@ template <class TImageType> struct PimpleImage;
 
 #endif
   };
+
+  class DelayedExecute
+  {
+  public:
+    typedef std::tr1::function< itk::SmartPointer<Image> ( void ) > FunctionObjectType;
+
+    explicit DelayedExecute( FunctionObjectType _funcObject )
+      : funcObject( _funcObject )
+      {}
+
+    operator Image::Pointer() { return this->funcObject(); }
+
+  protected:
+
+  private:
+
+    DelayedExecute( ); // not implemented
+    DelayedExecute( const DelayedExecute & ); // not implemented
+    DelayedExecute &operator=( const DelayedExecute & ); // not implemented
+
+    FunctionObjectType funcObject;
+  };
+
   }
 }
 

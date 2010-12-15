@@ -6,6 +6,7 @@
 namespace itk {
   namespace simple {
 
+
     class CastImageFilter : ImageFilter {
     public:
       typedef CastImageFilter      Self;
@@ -22,6 +23,13 @@ namespace itk {
 
       // Print ourselves out
       std::string ToString() const;
+
+      DelayedExecute DelayExecute( Image::Pointer i )
+        {
+          return DelayedExecute( std::tr1::bind( &Self::Execute, this, i ) );
+        }
+
+      Image::Pointer VExecute ( void ) { return NULL; };
 
       Image::Pointer Execute ( Image::Pointer );
 
