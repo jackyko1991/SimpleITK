@@ -15,7 +15,7 @@ namespace itk {
       //
       // Type List Setup
       //
-      typedef BasicPixelIDTypeList PixelIDTypeList;
+      typedef typelist::Append<BasicPixelIDTypeList, VectorPixelIDTypeList>::Type PixelIDTypeList;
 
       //
       // Filter Setup
