@@ -25,6 +25,14 @@ CastImageFilter::CastImageFilter ()
   this->RegisterMemberFactory3v();
   this->RegisterMemberFactory3l();
 
+  // basic to Label
+  m_DualMemberFactory->RegisterMemberFunctions<BasicPixelIDTypeList, LabelPixelIDTypeList, 2, ToLabelAddressor<MemberFunctionType> > ();
+  m_DualMemberFactory->RegisterMemberFunctions<BasicPixelIDTypeList, LabelPixelIDTypeList, 3, ToLabelAddressor<MemberFunctionType> > ();
+
+ // Label to basic
+  m_DualMemberFactory->RegisterMemberFunctions<LabelPixelIDTypeList, BasicPixelIDTypeList, 2, LabelToAddressor<MemberFunctionType> > ();
+  m_DualMemberFactory->RegisterMemberFunctions<LabelPixelIDTypeList, BasicPixelIDTypeList, 3, LabelToAddressor<MemberFunctionType> > ();
+
 }
 
 //
