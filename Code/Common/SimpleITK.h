@@ -17,6 +17,9 @@
 #include "sitkStatisticsImageFilter.h"
 #include "sitkExtractImageFilter.h"
 #include "sitkCastImageFilter.h"
+#include "sitkShapeLabelMapFilter.h"
+#include "sitkShapeOpeningLabelMapFilter.h"
+#include "sitkImageToLabelMapFilter.h"
 
 // Registration support
 #include "sitkTransform.h"
