@@ -32,7 +32,8 @@ std::string ExtractImageFilter::ToString() const
   {
   std::ostringstream out;
   out << "itk::simple::ExtractImageFilter\n"
-      << "\tSlice: " << this->m_Slice << "\n";
+      << "\tSlice: " << this->m_Slice << "\n"
+      << "\tDimension: " << this->m_Dimension << "\n";
   return out.str();
   }
 
