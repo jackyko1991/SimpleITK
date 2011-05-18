@@ -36,7 +36,8 @@ namespace simple
   public:
     typedef Image              Self;
 
-    virtual ~Image( );
+     Image();
+    ~Image( );
 
     // copy constructor
     Image( const Image &img );

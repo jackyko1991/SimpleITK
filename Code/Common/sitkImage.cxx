@@ -554,6 +554,12 @@ namespace itk
       }
     }
 
+  Image::Image( )
+    : m_PimpleImage( NULL )
+  {
+    Allocate ( 0, 0, 0, sitkUInt8 );
+  }
+
   Image::~Image( )
   {
     delete this->m_PimpleImage;
