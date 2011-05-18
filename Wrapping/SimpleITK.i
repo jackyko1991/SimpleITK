@@ -79,7 +79,13 @@ namespace std
 %include "sitkHashImageFilter.h"
 %include "sitkStatisticsImageFilter.h"
 %include "sitkExtractImageFilter.h"
+%include "sitkJoinSeriesImageFilter.h"
 %include "sitkCastImageFilter.h"
+
+namespace std
+{
+  %template(VectorImage) vector< itk::simple::Image >;
+}
 
 // Registration classes
 %include "sitkTransform.h"

@@ -16,6 +16,7 @@
 #include "sitkImageFileWriter.h"
 #include "sitkStatisticsImageFilter.h"
 #include "sitkExtractImageFilter.h"
+#include "sitkJoinSeriesImageFilter.h"
 #include "sitkCastImageFilter.h"
 
 // Registration support
