@@ -87,14 +87,24 @@ Image JoinSeriesImageFilter::Execute ( const std::vector<Image> &images )
       sitkExceptionMacro( << this->GetName() << " requires at least one image " );
       }
 
-    PixelIDValueType type = images.front().GetPixelIDValue();
-    unsigned int dimension = images.front().GetDimension();
+    const Image & image1 = images.front();
 
-    std::cout << "type: " << type << " dimension: " << dimension << std::endl;
+    PixelIDValueType type = image1.GetPixelIDValue();
+    unsigned int dimension = image1.GetDimension();
 
     for ( std::vector<Image>::const_iterator i = images.begin(); i != images.end(); ++i )
       {
-      // todo check that all the images are the same type and same size
+
+      const Image & image2 = *i;
+
+      if ( type != image2.GetPixelIDValue() ||
+           dimension != image2.GetDimension() ||
+           image1.GetWidth() != image2.GetWidth() ||
+           image1.GetHeight() != image2.GetHeight() ||
+           image1.GetDepth() != image2.GetDepth() )
+        {
+        sitkExceptionMacro ( "All images for " << this->GetName() << " don't match type or dimension!" );
+        }
       }
 
     return this->m_MemberFactory->GetMemberFunction( type, dimension )( images );
