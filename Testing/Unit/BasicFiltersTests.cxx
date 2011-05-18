@@ -111,13 +111,6 @@ TEST(BasicFilters,Cast) {
 
 }
 
-TEST(BasicFilters,HashImageFilter) {
-  itk::simple::HashImageFilter hasher;
-  EXPECT_NE ( "", hasher.ToString() );
-  EXPECT_EQ ( itk::simple::HashImageFilter::SHA1, hasher.SetHashFunction ( itk::simple::HashImageFilter::SHA1 ).GetHashFunction() );
-  EXPECT_EQ ( itk::simple::HashImageFilter::MD5, hasher.SetHashFunction ( itk::simple::HashImageFilter::MD5 ).GetHashFunction() );
-}
-
 #include "sitkJoinSeriesImageFilter.h"
 
 TEST(BasicFilters,JoinSeriesImageFilter) {
@@ -134,4 +127,12 @@ TEST(BasicFilters,JoinSeriesImageFilter) {
 
 
   EXPECT_EQ ( "c5aaf5a0a23bef479cdccf8d3ef586193d7869c2", sitk::Hash( img ) ) << " hash for 10 RA-Slice-Short.png";
+}
+
+
+TEST(BasicFilters,HashImageFilter) {
+  itk::simple::HashImageFilter hasher;
+  EXPECT_NE ( "", hasher.ToString() );
+  EXPECT_EQ ( itk::simple::HashImageFilter::SHA1, hasher.SetHashFunction ( itk::simple::HashImageFilter::SHA1 ).GetHashFunction() );
+  EXPECT_EQ ( itk::simple::HashImageFilter::MD5, hasher.SetHashFunction ( itk::simple::HashImageFilter::MD5 ).GetHashFunction() );
 }
