@@ -117,3 +117,21 @@ TEST(BasicFilters,HashImageFilter) {
   EXPECT_EQ ( itk::simple::HashImageFilter::SHA1, hasher.SetHashFunction ( itk::simple::HashImageFilter::SHA1 ).GetHashFunction() );
   EXPECT_EQ ( itk::simple::HashImageFilter::MD5, hasher.SetHashFunction ( itk::simple::HashImageFilter::MD5 ).GetHashFunction() );
 }
+
+#include "sitkJoinSeriesImageFilter.h"
+
+TEST(BasicFilters,JoinSeriesImageFilter) {
+  namespace sitk = itk::simple;
+
+  sitk::Image img = sitk::ReadImage( dataFinder.GetFile ( "Input/RA-Slice-Short.png" ) );
+
+
+  // create a vector of 10 of the same images, the shallow copy means
+  // that the memory will not be copied yet
+  std::vector<sitk::Image> images( 10, img );
+
+  img = sitk::JoinSeries( images );
+
+
+  EXPECT_EQ ( "c5aaf5a0a23bef479cdccf8d3ef586193d7869c2", sitk::Hash( img ) ) << " hash for 10 RA-Slice-Short.png";
+}

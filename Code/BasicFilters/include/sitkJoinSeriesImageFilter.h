@@ -10,6 +10,8 @@ namespace itk {
 
     /** \class JoinSeriesImageFilter
      * \brief Join a series of slices into a volume
+     *
+     * \todo this filter should support vector images, and complex
      */
     class JoinSeriesImageFilter
       : public MultiImageFilter {
