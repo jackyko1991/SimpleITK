@@ -1,0 +1,12 @@
+{
+  "name" : "Compose",
+  "template_code_filename" : "ImageFilter",
+  "template_test_filename" : "ImageFilter",
+  "number_of_inputs" : 3,
+  "doc" : "",
+  "filter_type" : "itk::ComposeImageFilter<InputImageType, itk::VectorImage<typename InputImageType::PixelType, InputImageType::ImageDimension> >",
+  "pixel_types" : "BasicPixelIDTypeList",
+  "members" : [ ],
+  "tests" : [ ]
+  } ]
+}
