@@ -29,7 +29,7 @@
       "java_value" : "${name}ImageFilter.KernelType.Ball",
       "tcl_value" : "$$${name}ImageFilter_Ball",
       "csharp_value" : "${name}ImageFilter.KernelType.Ball",
-      "R_value" : "\'Ball\'"
+      "R_value" : ":Ball:"
     } ]
   }, {
     "tag" : "short",
@@ -49,7 +49,7 @@
       "java_value" : "${name}ImageFilter.KernelType.Ball",
       "tcl_value" : "$$${name}ImageFilter_Ball",
       "csharp_value" : "${name}ImageFilter.KernelType.Ball",
-      "R_value" : "\'Ball\'"
+      "R_value" : ":Ball:"
     } ]
   } ],
   "briefdescription" : "dilation of an object in an image\n",
