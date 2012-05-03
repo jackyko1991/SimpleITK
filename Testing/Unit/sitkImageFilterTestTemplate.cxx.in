@@ -159,8 +159,8 @@ $(if inputA_cast then
       // Do we get the same image back, if we use the functional interface?
       itk::simple::Image fromFunctional( 0, 0, itk::simple::sitkUInt8 );
       itk::simple::Image fromProcedural( 0, 0, itk::simple::sitkUInt8 );
-      ASSERT_NO_THROW ( fromProcedural = filter.Execute ( inputs[0] $(for inum=2,#inputs do OUT=OUT..", inputs["..inum.."]" end) ) ) << "Procedural interface to ${name}";
-      ASSERT_NO_THROW ( fromFunctional = itk::simple::${name} ( inputs[0] $(for inum=2,#inputs do OUT=OUT..", inputs["..inum.."]" end)
+      ASSERT_NO_THROW ( fromProcedural = filter.Execute ( $(if #inputs > 0 then OUT=[[inputs[0] ]] end)$(for inum=1,#inputs-1 do OUT=OUT..", inputs["..inum.."]" end) ) ) << "Procedural interface to ${name}";
+      ASSERT_NO_THROW ( fromFunctional = itk::simple::${name} ( $(if #inputs > 0 then OUT=[[inputs[0] ]] end)$(for inum=1,#inputs-1 do OUT=OUT..", inputs["..inum.."]" end)
                                                                        $(if template_type and template_type == "RegionGrowing" then OUT=", std::vector< std::vector<unsigned int> >()" end)
                                                                        $(if template_code_filename and template_code_filename == "FastMarchingImageFilter" then OUT=", std::vector< std::vector<unsigned int> >()" end)
                                                                        $(if template_code_filename and template_code_filename == "KernelImageFilter" then OUT=[[, 1, itk::simple::${name}ImageFilter::Ball]] end)
@@ -200,16 +200,19 @@ end)
 )]]
 end)
 
-    if ( inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt8 &&
+
+    if ( !inputs.empty() &&
+         inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt8 &&
          inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt16 &&
          inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt32 &&
          inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt64 )
       {
       inputSHA1hash =  itk::simple::Hash( inputs[0] );
       }
-    ASSERT_NO_THROW ( output =  filter.Execute ( inputs[0] $(for inum=2,#inputs do OUT=OUT..", inputs["..inum.."]"end) ) );
+   ASSERT_NO_THROW ( output =  filter.Execute ( $(if #inputs > 0 then OUT=[[inputs[0] ]] end)$(for inum=1,#inputs-1 do OUT=OUT..", inputs["..inum.."]" end) ) );
 
-    if ( inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt8 &&
+    if ( !inputs.empty() &&
+         inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt8 &&
          inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt16 &&
          inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt32 &&
          inputs[0].GetPixelIDValue() != itk::simple::sitkLabelUInt64 )
@@ -266,10 +269,10 @@ TEST_F(Lua,${name}) {
     CommandLine.push_back ( dataFinder.GetLuaExecutable() );
     CommandLine.push_back ( Script );
     CommandLine.push_back ( "${tag}" );
-    CommandLine.push_back ( dataFinder.GetFile ( "${inputA}" ) );
-    $(if inputB then
-      OUT=[[  CommandLine.push_back ( dataFinder.GetFile ( "${inputB}" ) );]]
-      end)
+$(for inum=1,#inputs do
+    OUT=OUT..[[
+  CommandLine.push_back( dataFinder.GetFile ("]]..inputs[inum]..[[")  );
+]] end)
     CommandLine.push_back ( outputFileName );
     EXPECT_EQ( 0, RunExecutable ( CommandLine, true ) ) << "non-zero returned from process";
     ASSERT_TRUE ( dataFinder.FileExists ( outputFileName ) );
@@ -324,10 +327,10 @@ TEST_F(Python,${name}) {
     CommandLine.push_back ( dataFinder.GetPythonExecutable() );
     CommandLine.push_back ( Script );
     CommandLine.push_back ( "${tag}" );
-    CommandLine.push_back ( dataFinder.GetFile ( "${inputA}" ) );
-    $(if inputB then
-      OUT=[[  CommandLine.push_back ( dataFinder.GetFile ( "${inputB}" ) );]]
-      end)
+$(for inum=1,#inputs do
+    OUT=OUT..[[
+  CommandLine.push_back( dataFinder.GetFile ("]]..inputs[inum]..[[")  );
+]] end)
     CommandLine.push_back ( outputFileName );
     EXPECT_EQ( 0, RunExecutable ( CommandLine, true ) ) << "non-zero returned from process";
     ASSERT_TRUE ( dataFinder.FileExists ( outputFileName ) );
@@ -382,10 +385,10 @@ TEST_F(Tcl,${name}) {
     CommandLine.push_back ( dataFinder.GetTclExecutable ( ) );
     CommandLine.push_back ( Script );
     CommandLine.push_back ( "${tag}" );
-    CommandLine.push_back ( dataFinder.GetFile ( "${inputA}" ) );
-    $(if inputB then
-      OUT=[[  CommandLine.push_back ( dataFinder.GetFile ( "${inputB}" ) );]]
-      end)
+$(for inum=1,#inputs do
+    OUT=OUT..[[
+  CommandLine.push_back( dataFinder.GetFile ("]]..inputs[inum]..[[")  );
+]] end)
     CommandLine.push_back ( outputFileName );
     EXPECT_EQ( 0, RunExecutable ( CommandLine, true ) ) << "non-zero returned from process";
     ASSERT_TRUE ( dataFinder.FileExists ( outputFileName ) );
@@ -449,11 +452,10 @@ TEST_F(R,${name}) {
     CommandLine.push_back ( std::string("--file=")+Script );
     CommandLine.push_back ( "--args" );
     CommandLine.push_back ( "${tag}" );
-    CommandLine.push_back ( dataFinder.GetFile ( "${inputA}" ) );
-    $(if inputB then
-      OUT=[[  CommandLine.push_back ( dataFinder.GetFile ( "${inputB}" ) );]]
-      end)
-
+$(for inum=1,#inputs do
+    OUT=OUT..[[
+  CommandLine.push_back( dataFinder.GetFile ("]]..inputs[inum]..[[")  );
+]] end)
     CommandLine.push_back ( outputFileName );
     EXPECT_EQ( 0, RunExecutable ( CommandLine, true ) ) << "non-zero returned from process";
     ASSERT_TRUE ( dataFinder.FileExists ( outputFileName ) );
@@ -517,10 +519,10 @@ TEST_F(Java,${name}) {
     CommandLine.push_back ( "-Djava.library.path=" + JavaPath );
     CommandLine.push_back ( Script );
     CommandLine.push_back ( "${tag}" );
-    CommandLine.push_back ( dataFinder.GetFile ( "${inputA}" ) );
-    $(if inputB then
-      OUT=[[  CommandLine.push_back ( dataFinder.GetFile ( "${inputB}" ) );]]
-      end)
+$(for inum=1,#inputs do
+    OUT=OUT..[[
+  CommandLine.push_back( dataFinder.GetFile ("]]..inputs[inum]..[[")  );
+]] end)
     CommandLine.push_back ( outputFileName );
     EXPECT_EQ( 0, RunExecutable ( CommandLine, true ) ) << "non-zero returned from process";
     ASSERT_TRUE ( dataFinder.FileExists ( outputFileName ) );
@@ -578,10 +580,10 @@ TEST_F(Ruby,${name}) {
     CommandLine.push_back ( dataFinder.GetRubyExecutable() );
     CommandLine.push_back ( Script );
     CommandLine.push_back ( "${tag}" );
-    CommandLine.push_back ( dataFinder.GetFile ( "${inputA}" ) );
-    $(if inputB then
-      OUT=[[  CommandLine.push_back ( dataFinder.GetFile ( "${inputB}" ) );]]
-      end)
+$(for inum=1,#inputs do
+    OUT=OUT..[[
+  CommandLine.push_back( dataFinder.GetFile ("]]..inputs[inum]..[[")  );
+]] end)
     CommandLine.push_back ( outputFileName );
     EXPECT_EQ( 0, RunExecutable ( CommandLine, true ) ) << "non-zero returned from process";
     ASSERT_TRUE ( dataFinder.FileExists ( outputFileName ) );
@@ -649,10 +651,10 @@ TEST_F(CSharp,${name}) {
     CommandLine.push_back ( ExePathAndName );
     CommandLine.push_back ( dataFinder.GetFile ( "Input/RA-Short.nrrd" ).c_str() );
     CommandLine.push_back ( "${tag}" );
-    CommandLine.push_back ( dataFinder.GetFile ( "${inputA}" ) );
-    $(if inputB then
-      OUT=[[  CommandLine.push_back ( dataFinder.GetFile ( "${inputB}" ) );]]
-      end)
+$(for inum=1,#inputs do
+    OUT=OUT..[[
+  CommandLine.push_back( dataFinder.GetFile ("]]..inputs[inum]..[[")  );
+]] end)
     CommandLine.push_back ( outputFileName );
     EXPECT_EQ( 0, RunExecutable ( CommandLine, true ) ) << "non-zero returned from process";
     ASSERT_TRUE ( dataFinder.FileExists ( outputFileName ) );
