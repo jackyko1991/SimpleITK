@@ -5,7 +5,8 @@
      *
      * \sa itk::simple::${name} for the procedual interface
      */
-    class SITKBasicFilters_EXPORT ${name}ImageFilter : public $(if number_of_inputs then OUT=[[ImageFilter<${number_of_inputs}>]] else OUT=[[ImageFilter<1>]] end) {
+    class SITKBasicFilters_EXPORT ${name}ImageFilter
+      : public ImageFilter<${number_of_inputs}> {
     public:
       typedef ${name}ImageFilter Self;
 

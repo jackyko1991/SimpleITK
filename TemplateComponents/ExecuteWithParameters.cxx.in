@@ -1,7 +1,7 @@
 $(if members and #members > 0 then
 OUT = [[
 
-Image ${name}ImageFilter::Execute ( const Image & image1$(if number_of_inputs==2 then OUT=', const Image& image2' end)$(foreach members ,
+Image ${name}ImageFilter::Execute ( $(include ImageParameters.in)$(foreach members $(if number_of_inputs > 0 then OUT="," end)
   ${type} in${name}) )
 {
 $(foreach members

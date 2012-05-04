@@ -3,5 +3,4 @@ OUT=[[
 
 
       /** Execute the filter on the input image$(if number_of_inputs == 2 then OUT='s'end) with the given parameters */
-      Image Execute ( $(include ImageParameters.in)$(foreach members ,
-        ${type} in${name}) );]]end)
+        Image Execute ( $(include ImageParameters.in)$(for i=0,#members do OUT=OUT..", "..members[i].." in" end) );]]end)
