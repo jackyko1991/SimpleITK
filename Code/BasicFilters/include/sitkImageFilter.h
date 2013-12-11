@@ -25,6 +25,8 @@
 
 namespace itk {
 
+template< typename T, unsigned int NVectorDimension > class Vector;
+
   namespace simple {
 
   /** \class ImageFilter
@@ -72,6 +74,37 @@ namespace itk {
           sitkExceptionMacro( "Unexpected template dispatch error!" );
           }
         return itkImage;
+      }
+
+      template< class TImageType >
+        static Image CastITKToImage( TImageType *img )
+      {
+        return Image(img);
+      }
+
+      template< class TPixelType, unsigned int VImageDimension, unsigned int  VLength>
+        static Image CastITKToImage( itk::Image< itk::Vector< TPixelType, VLength >, VImageDimension> *img )
+      {
+        typedef itk::Image< itk::Vector< TPixelType, VLength >, VImageDimension> ImageType;
+        typedef itk::VectorImage< TPixelType, VImageDimension > VectorImageType;
+
+        size_t numberOfElements = img->GetBufferedRegion().GetNumberOfPixels();
+        typename VectorImageType::InternalPixelType* buffer = reinterpret_cast<typename VectorImageType::InternalPixelType*>( img->GetPixelContainer()->GetBufferPointer() );
+
+        // Unlike an image of Vectors a VectorImage's container is a
+        // container of TPixelType, whos size is the image's number of
+        // pixels * number of pixels per component
+        numberOfElements *= VImageDimension;
+
+        typename VectorImageType::Pointer out = VectorImageType::New();
+
+        // Set the image's pixel container to import the pointer provided.
+        out->GetPixelContainer()->SetImportPointer(buffer, numberOfElements, true );
+        img->GetPixelContainer()->ContainerManageMemoryOff();
+        out->CopyInformation( img );
+        out->SetRegions( img->GetBufferedRegion() );
+
+        return Image(out.GetPointer());
       }
 
       // Simple ITK must use a zero based index
