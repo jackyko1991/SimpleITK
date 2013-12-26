@@ -21,6 +21,7 @@
 #include "sitkCommon.h"
 #include "sitkNonCopyable.h"
 #include "sitkTemplateFunctions.h"
+#include "sitkImage.h"
 
 #include <iostream>
 
@@ -99,6 +100,20 @@ namespace itk {
       #ifndef SWIG
       virtual void PreUpdate( itk::ProcessObject *p );
       #endif
+
+
+      template< class TImageType >
+      static typename TImageType::ConstPointer CastImageToITK( const Image &img )
+      {
+        typename TImageType::ConstPointer itkImage =
+          dynamic_cast < const TImageType* > ( img.GetITKBase() );
+
+        if ( itkImage.IsNull() )
+          {
+          sitkExceptionMacro( "Unexpected template dispatch error!" );
+          }
+        return itkImage;
+      }
 
       /**
        * Output operator to os with conversion to a printable type.
