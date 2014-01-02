@@ -83,6 +83,13 @@ namespace itk {
       static bool GetGlobalDefaultDebug();
       static void SetGlobalDefaultDebug(bool debugFlag);
 
+      static void GlobalWarningDisplayOn();
+      static void GlobalWarningDisplayOff();
+
+      /** Get the value of the default debug flag.  */
+      static bool GetGlobalWarningDisplay();
+      static void SetGlobalWarningDisplay(bool flag);
+
       /** Set the number of threads that all new process objects are
        *  initialized with. */
       static void SetGlobalDefaultNumberOfThreads(unsigned int n);
