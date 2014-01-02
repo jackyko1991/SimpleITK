@@ -16,10 +16,22 @@
 *
 *=========================================================================*/
 #include "sitkProcessObject.h"
+#include "sitkCommand.h"
 
 #include "itkProcessObject.h"
+#include "itkCommand.h"
 
 #include <iostream>
+#include <algorithm>
+
+
+#if defined SITK_HAS_STLTR1_TR1_FUNCTIONAL
+#include <tr1/functional>
+#elif defined SITK_HAS_STLTR1_FUNCTIONAL
+#include <functional>
+#else
+#error "No system tr1 functional available"
+#endif
 
 namespace itk {
 namespace simple {
@@ -27,6 +39,87 @@ namespace simple {
 namespace
 {
 static bool GlobalDefaultDebug = false;
+
+static itk::AnyEvent eventAnyEvent;
+static itk::AbortEvent eventAbortEvent;
+static itk::DeleteEvent eventDeleteEvent;
+static itk::EndEvent eventEndEvent;;
+static itk::IterationEvent eventIterationEvent;
+static itk::ProgressEvent eventProgressEvent;
+static itk::StartEvent eventStartEvent;
+static itk::UserEvent eventUserEvent;
+
+const itk::EventObject &GetITKEventObject(EventEnum e)
+{
+  switch (e)
+    {
+    case sitkAnyEvent:
+      return eventAnyEvent;
+    case sitkAbortEvent:
+      return eventAbortEvent;
+    case sitkDeleteEvent:
+      return eventDeleteEvent;
+    case sitkEndEvent:
+      return eventEndEvent;
+    case sitkIterationEvent:
+      return eventIterationEvent;
+    case sitkProgressEvent:
+      return eventProgressEvent;
+    case sitkStartEvent:
+      return eventStartEvent;
+    case sitkUserEvent:
+      return eventUserEvent;
+    default:
+      sitkExceptionMacro("LogicError: Unexpected event case!");
+    }
+}
+
+class SimpleAdaptorCommand
+  : public itk::Command
+{
+public:
+
+  typedef SimpleAdaptorCommand Self;
+  typedef SmartPointer< Self >  Pointer;
+
+  itkNewMacro(Self);
+
+  itkTypeMacro(SimpleAdaptorCommand, Command);
+
+  void SetSimpleCommand( itk::simple::Command *cmd )
+    {
+      m_That=cmd;
+    }
+
+  /**  Invoke the member function. */
+  virtual void Execute(Object *, const EventObject & )
+  {
+    if (m_That)
+      {
+      m_That->Execute();
+      }
+  }
+
+  /**  Invoke the member function with a const object */
+  virtual void Execute(const Object *, const EventObject & )
+  {
+    if ( m_That )
+      {
+      m_That->Execute();
+      }
+  }
+
+protected:
+  itk::simple::Command *                    m_That;
+  SimpleAdaptorCommand():m_That(0) {}
+  virtual ~SimpleAdaptorCommand() {}
+
+private:
+  SimpleAdaptorCommand(const Self &); //purposely not implemented
+  void operator=(const Self &);        //purposely not implemented
+};
+
+
 }
 
 //----------------------------------------------------------------------------
@@ -36,7 +129,8 @@ static bool GlobalDefaultDebug = false;
 //
 ProcessObject::ProcessObject ()
   : m_Debug(ProcessObject::GetGlobalDefaultDebug()),
-    m_NumberOfThreads(ProcessObject::GetGlobalDefaultNumberOfThreads())
+    m_NumberOfThreads(ProcessObject::GetGlobalDefaultNumberOfThreads()),
+    m_ActiveProcess(NULL)
 {
 }
 
@@ -45,6 +139,7 @@ ProcessObject::ProcessObject ()
 //
 ProcessObject::~ProcessObject ()
 {
+  Self::RemoveAllCommands();
 }
 
 std::ostream & ProcessObject::ToStringHelper(std::ostream &os, const char &v)
@@ -109,6 +204,25 @@ void ProcessObject::SetGlobalDefaultDebug(bool debugFlag)
   GlobalDefaultDebug = debugFlag;
 }
 
+void ProcessObject::GlobalWarningDisplayOn()
+{
+  itk::Object::GlobalWarningDisplayOn();
+}
+
+void ProcessObject::GlobalWarningDisplayOff()
+{
+  itk::Object::GlobalWarningDisplayOn();
+}
+
+bool ProcessObject::GetGlobalWarningDisplay()
+{
+  return itk::Object::GetGlobalWarningDisplay();
+}
+
+void ProcessObject::SetGlobalWarningDisplay(bool flag)
+{
+  itk::Object::SetGlobalWarningDisplay(flag);
+}
 
 
 void ProcessObject::SetGlobalDefaultNumberOfThreads(unsigned int n)
@@ -132,9 +246,86 @@ unsigned int ProcessObject::GetNumberOfThreads() const
 }
 
 
+int ProcessObject::AddCommand( EventEnum event, Command *cmd)
+{
+  if (cmd)
+    {
+    m_Commands.push_back(EventCommandPairType(event,cmd));
+    cmd->AddProcessObject(this);
+    }
+  return 0;
+}
+
+void ProcessObject::RemoveAllCommands()
+{
+  std::list<EventCommandPairType> oldCommands;
+  swap(oldCommands, m_Commands);
+  oldCommands.sort();
+  oldCommands.unique();
+  std::list<EventCommandPairType>::iterator i = oldCommands.begin();
+  while( i != oldCommands.end() )
+    {
+    // note: we may call remove multiple times on the same command
+    i++->second->RemoveProcessObject(this);
+    }
+}
+
+bool ProcessObject::HasCommand( EventEnum event ) const
+{
+  std::list<EventCommandPairType>::const_iterator i = m_Commands.begin();
+  while( i != m_Commands.end() )
+    {
+    if (i->first == event)
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+float ProcessObject::GetProgress( ) const
+{
+  if ( this->m_ActiveProcess )
+    {
+    return this->m_ActiveProcess->GetProgress();
+    }
+  return 0.0;
+}
+
+void ProcessObject::Abort()
+{
+  if ( this->m_ActiveProcess )
+    {
+    this->m_ActiveProcess->AbortGenerateDataOn();
+    }
+}
+
 void ProcessObject::PreUpdate( itk::ProcessObject *p )
 {
   assert(p);
+
+  itk::SimpleMemberCommand<Self>::Pointer onDelete = itk::SimpleMemberCommand<Self>::New();
+  onDelete->SetCallbackFunction(this, &Self::OnActiveProcessDelete );
+  p->AddObserver(itk::DeleteEvent(), onDelete);
+
+  this->m_ActiveProcess = p;
+
+  p->SetNumberOfThreads(this->GetNumberOfThreads());
+
+
+  for (std::list<EventCommandPairType>::iterator i = m_Commands.begin();
+       i != m_Commands.end();
+       ++i)
+    {
+    const itk::EventObject &itkEvent = GetITKEventObject(i->first);
+
+    Command *cmd = i->second;
+
+    SimpleAdaptorCommand::Pointer itkCommand = SimpleAdaptorCommand::New();
+    itkCommand->SetSimpleCommand(cmd);
+
+    this->PreUpdateAddObserver(p, itkEvent, itkCommand );
+    }
 
   if (this->GetDebug())
      {
@@ -142,9 +333,45 @@ void ProcessObject::PreUpdate( itk::ProcessObject *p )
      p->Print(std::cout);
      }
 
-  p->SetNumberOfThreads(this->GetNumberOfThreads());
-
 }
+
+
+void ProcessObject::PreUpdateAddObserver( itk::ProcessObject *p,
+                                          const itk::EventObject &e,
+                                          itk::Command *c)
+{
+  p->AddObserver(e,c);
+}
+
+itk::ProcessObject *ProcessObject::GetActiveProcess( )
+{
+  if (this->m_ActiveProcess)
+    {
+    return this->m_ActiveProcess;
+    }
+  sitkExceptionMacro("No active process for \"" << this->GetName() << "\"!");
+}
+
+void ProcessObject::OnActiveProcessDelete( )
+{
+  this->m_ActiveProcess = NULL;
+}
+
+namespace
+{
+bool rm_pred( const itk::simple::Command *cmd, const std::pair<EventEnum, Command*> &i)
+{
+  return cmd == i.second;
+}
+}
+
+void ProcessObject::onCommandDelete(const itk::simple::Command *cmd) throw()
+{
+  // remove all uses of command
+  using namespace std::tr1::placeholders;
+  m_Commands.remove_if(std::tr1::bind(rm_pred,cmd,_1));
+}
+
 
 } // end namespace simple
 } // end namespace itk

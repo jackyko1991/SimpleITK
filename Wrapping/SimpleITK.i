@@ -77,6 +77,9 @@
 %{
 #include <SimpleITK.h>
 #include <sitkImageOperators.h>
+#if defined(SWIGPYTHON)
+#include "sitkPyCommand.h"
+#endif
 %}
 
 // Language Specific Sections
@@ -133,16 +136,22 @@ namespace std
 %include "sitkPixelIDValues.h"
 %include "sitkImage.h"
 %include "sitkTransform.h"
-%include "sitkShow.h"
+%include "sitkCommand.h"
+%include "sitkProcessEventWatcher.h"
+%include "sitkBasicFilterWatcher.h"
+
+
 %include "sitkInterpolator.h"
 %include "sitkKernel.h"
+%include "sitkEvent.h"
+
+%include "sitkShow.h"
 %include "sitkImageFileWriter.h"
 %include "sitkImageSeriesReader.h"
 %include "sitkImageFileReader.h"
+
 %include "sitkHashImageFilter.h"
 %include "sitkStatisticsImageFilter.h"
-%include "sitkJoinSeriesImageFilter.h"
-%include "sitkComposeImageFilter.h"
 %include "sitkMeasurementMap.h"
 %include "sitkLabelStatisticsImageFilter.h"
 
@@ -168,6 +177,34 @@ namespace std
 // Only C# can handle import filter
 #if SWIGCSHARP
 %include "sitkImportImageFilter.h"
+#endif
+
+#ifdef SWIGPYTHON
+%include "sitkPyCommand.h"
+
+%extend itk::simple::ProcessObject {
+ int AddCommand( itk::simple::EventEnum e, PyObject *obj )
+ {
+   if (!PyCallable_Check(obj))
+     {
+     return 0;
+     }
+   itk::simple::PyCommand *cmd = NULL;
+   try
+     {
+       cmd = new itk::simple::PyCommand();
+       cmd->SetCommandCallable(obj);
+       int ret = self->AddCommand(e,cmd);
+       cmd->OwnedByProcessObjectsOn();
+       return ret;
+     }
+   catch(...)
+     {
+       delete cmd;
+       throw;
+     }
+ }
+};
 #endif
 
 // Auto-generated headers

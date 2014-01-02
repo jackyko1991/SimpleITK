@@ -8,6 +8,10 @@ if ( WRAP_LUA OR WRAP_PYTHON OR WRAP_JAVA OR WRAP_CSHARP OR WRAP_TCL OR WRAP_R O
 
   set_source_files_properties ( SimpleITK.i PROPERTIES CPLUSPLUS ON )
 
+  file(GLOB SWIG_EXTRA_DEPS
+    "${SimpleITK_SOURCE_DIR}/Code/Common/include/*.h"
+    "${SimpleITK_SOURCE_DIR}/Code/IO/include/*.h")
+
   # make a manual list of dependencies for the Swig.i files
   list( APPEND SWIG_EXTRA_DEPS "${SimpleITK_BINARY_DIR}/Code/BasicFilters/include/SimpleITKBasicFiltersGeneratedHeaders.i"
     "${SimpleITK_BINARY_DIR}/Code/BasicFilters/include/SimpleITKBasicFiltersGeneratedHeaders.h"
@@ -75,7 +79,9 @@ if ( WRAP_PYTHON )
   set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR})
   set(SWIG_MODULE_SimpleITK_EXTRA_DEPS ${SWIG_EXTRA_DEPS}
     ${CMAKE_CURRENT_SOURCE_DIR}/Python.i )
-  SWIG_add_module ( SimpleITK python SimpleITK.i SimpleITKPYTHON_wrap.cxx )
+  SWIG_add_module ( SimpleITK python
+    SimpleITK.i
+    sitkPyCommand.cxx )
   SWIG_link_libraries ( SimpleITK ${SimpleITK_LIBRARIES} ${PYTHON_LIBRARIES})
   set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/SimpleITKPYTHON_wrap.cxx PROPERTIES COMPILE_FLAGS "-w")
 
