@@ -126,6 +126,8 @@ namespace std
 #define SITKBasicFilters_HIDDEN
 #define SITKIO_EXPORT
 #define SITKIO_HIDDEN
+#define SITKRegistration_EXPORT
+#define SITKRegistration_HIDDEN
 
 
 // Any new classes need to have an "%include" statement to be wrapped.
@@ -159,6 +161,7 @@ namespace std
 %include "sitkAdditionalProcedures.h"
 %include "sitkVersion.h"
 
+%include "sitkImageRegistrationMethod.h"
 
 %template(ImageFilterExecuteBase_0) itk::simple::ImageFilterExecuteBase<0>;
 %template(ImageFilterExecuteBase_1) itk::simple::ImageFilterExecuteBase<1>;

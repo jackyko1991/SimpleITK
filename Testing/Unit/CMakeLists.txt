@@ -552,6 +552,83 @@ if ( WRAP_PYTHON )
   )
 
 
+  set(ITK_SOURCE_DIR "${SimpleITK_BINARY_DIR}/../ITK/")
+  set(TEMP ${TEST_HARNESS_TEMP_DIRECTORY})
+
+  add_python_test( Example.ImageRegistration1
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration1.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceShifted13x17y.png
+    ${TEMP}/ImageRegistration1Test.png
+    )
+
+ add_python_test( Example.ImageRegistration2
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration2.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceShifted13x17y.png
+    ${TEMP}/ImageRegistration2Test.png
+    )
+
+  add_python_test( Example.ImageRegistration4Test1
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration4.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceShifted13x17y.png
+    ${TEMP}/ImageRegistration4Test1.png
+    24 10000 1
+    )
+
+  add_python_test( Example.ImageRegistration4Test2
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration4.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainT1SliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceShifted13x17y.png
+    ${TEMP}/ImageRegistration4Test2.png
+    24 10000 0
+    )
+
+  add_python_test( Example.ImageRegistration4Test3
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration4.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20Mask.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20Mask.png
+    ${TEMP}/ImageRegistration4Test3.png
+    5 10000 0
+    )
+
+  add_python_test( Example.ImageRegistration5Test1
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration5.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceRotated10.png
+    ${TEMP}/ImageRegistration5Test1PixelCentered.png
+    )
+
+  add_python_test( Example.ImageRegistration5Test2
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration5.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceR10X13Y17.png
+    ${TEMP}/ImageRegistration5Test2PixelCentered.png
+    )
+
+  add_python_test( Example.ImageRegistration9Test
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration9.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceR10X13Y17.png
+    ${TEMP}/ImageRegistration9Test.png
+    )
+
+
+  add_python_test( Example.ImageRegistration10Test
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration10.py"
+    ${TEMP}/WatershedSegmentation1Test1.png
+    ${TEMP}/WatershedSegmentation1Test2.png
+    ${TEMP}/ImageRegistration10TestPixelCentered.png
+    )
+
+  add_python_test( Example.ImageRegistration15Test
+    "${SimpleITK_SOURCE_DIR}/Examples/ImageRegistration15.py"
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceBorder20.png
+    ${ITK_SOURCE_DIR}/Examples/Data/BrainProtonDensitySliceShifted13x17y.png
+    ${TEMP}/ImageRegistration15Test.png
+    )
+
 
 endif( WRAP_PYTHON )
 
