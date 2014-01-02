@@ -21,16 +21,23 @@
 #include "sitkCommon.h"
 #include "sitkNonCopyable.h"
 #include "sitkTemplateFunctions.h"
+#include "sitkEvent.h"
 
 #include <iostream>
+#include <list>
 
 namespace itk {
 
 #ifndef SWIG
   class ProcessObject;
+  class Command;
+  class EventObject;
 #endif
 
   namespace simple {
+
+  class Command;
+
 
   /** \class ProcessObject
    * \brief Base class for SimpleITK classes based on ProcessObject
@@ -100,11 +107,31 @@ namespace itk {
       void SetNumberOfThreads(unsigned int n);
       unsigned int GetNumberOfThreads() const;
 
+      int AddCommand( itk::simple::EventEnum event, itk::simple::Command *cmd);
+      // Command GetCommand( int cmdID );
+      //void RemoveCommand( int cmdID );
+      void RemoveAllCommands();
+      bool HasCommand( itk::simple::EventEnum event ) const;
+
+      /** Get the execution progress of a process object. The progress
+       * is a floating number in [0,1] with 0 meaning no progress and 1
+       * meaning the filter has completed execution. */
+      float GetProgress( ) const;
+
+      void Abort();
 
     protected:
 
       #ifndef SWIG
       virtual void PreUpdate( itk::ProcessObject *p );
+      virtual void PreUpdateAddObserver( itk::ProcessObject *p, const itk::EventObject &, itk::Command *);
+
+      virtual itk::ProcessObject *GetActiveProcess( );
+
+      virtual void OnActiveProcessDelete( );
+
+      friend class itk::simple::Command;
+      virtual void onCommandDelete(const itk::simple::Command *cmd) throw();
       #endif
 
       /**
@@ -128,6 +155,10 @@ namespace itk {
       bool m_Debug;
       unsigned int m_NumberOfThreads;
 
+      typedef std::pair<EventEnum, Command*> EventCommandPairType;
+      std::list<EventCommandPairType> m_Commands;
+
+      itk::ProcessObject *m_ActiveProcess;
     };
 
 
