@@ -96,52 +96,42 @@ public:
     const itk::SingleValuedNonLinearVnlOptimizer *vnlOpt
       = dynamic_cast<const itk::SingleValuedNonLinearVnlOptimizer *>(optimizer);
 
+    // std::cout << "ImageRegistration Command { ";
     if ( gdOpt )
       {
-      std::cout << gdOpt->GetCurrentIteration() << " = ";
-      std::cout << gdOpt->GetValue() << " : ";
       m_sitkIRM.m_MetricValue = gdOpt->GetValue();
       m_sitkIRM.m_Iteration = gdOpt->GetCurrentIteration();
       }
     else if ( rsgdOpt )
       {
-      std::cout << rsgdOpt->GetCurrentIteration() << " = ";
-      std::cout << rsgdOpt->GetValue() << " : ";
-      std::cout << rsgdOpt->GetCurrentStepLength() << "   ";
+      // std::cout << rsgdOpt->GetCurrentStepLength() << "   ";
       m_sitkIRM.m_MetricValue =  rsgdOpt->GetValue();
       m_sitkIRM.m_Iteration = rsgdOpt->GetCurrentIteration();
       }
     else if( opoeOpt )
       {
-      std::cout << opoeOpt->GetCurrentIteration() << "   ";
-      std::cout << opoeOpt->GetValue() << " : ";
-      std::cout << opoeOpt->GetFrobeniusNorm() << "   ";
+      // std::cout << opoeOpt->GetFrobeniusNorm() << "   ";
       m_sitkIRM.m_MetricValue =  opoeOpt->GetValue();
       m_sitkIRM.m_Iteration = opoeOpt->GetCurrentIteration();
       }
     else if ( eOpt )
       {
-      std::cout << eOpt->GetCurrentIndex() << "   ";
-      std::cout << eOpt->GetCurrentValue() << " : ";
+      // std::cout << eOpt->GetCurrentIndex() << "   ";
       m_sitkIRM.m_MetricValue =  eOpt->GetCurrentValue();
       m_sitkIRM.m_Iteration = m_IterationNumber;
       }
     else if ( vnlOpt )
       {
-      std::cout << m_IterationNumber << "   ";
-      std::cout << vnlOpt->GetCachedValue() << " :  ";
-      std::cout << vnlOpt->GetCachedCurrentPosition() << std::endl;
       m_sitkIRM.m_MetricValue =  vnlOpt->GetCachedValue();
       m_sitkIRM.m_Iteration = m_IterationNumber;
       return;
       }
     else
       {
-      std::cout << m_IterationNumber << " = ";
+      // std::cout << m_IterationNumber << " = ";
       m_sitkIRM.m_Iteration = m_IterationNumber;
       }
-
-    std::cout << optimizer->GetCurrentPosition() << std::endl;
+    // std::cout << " }" << std::endl;
   }
 
 };
@@ -633,8 +623,9 @@ public:
         registration->SetFixedImageRegion( r );
         }
 
-
+      this->m_ActiveOptimizer = optimizer;
       this->PreUpdate( registration.GetPointer() );
+
       if (this->GetDebug())
         {
         std::cout << optimizer;
@@ -649,6 +640,31 @@ public:
       return this->m_Transform;
     }
 
+
+void ImageRegistrationMethod::PreUpdate( itk::ProcessObject *p )
+{
+  Superclass::PreUpdate(p);
+}
+
+
+void ImageRegistrationMethod::PreUpdateAddObserver( itk::ProcessObject *p, const itk::EventObject &e, itk::Command *c)
+{
+  assert(this->m_ActiveOptimizer);
+  // todo switch to generator function
+  itk::IterationEvent iterationEvent;
+  if (e.CheckEvent(&iterationEvent))
+    {
+    this->m_ActiveOptimizer->AddObserver(e,c);
+    return;
+    }
+  Superclass::PreUpdateAddObserver(p,e,c);
+}
+
+void ImageRegistrationMethod::OnActiveProcessDelete( ) throw()
+{
+  Superclass::OnActiveProcessDelete( );
+  this->m_ActiveOptimizer = NULL;
+}
 
 
 }

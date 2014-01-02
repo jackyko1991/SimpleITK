@@ -23,8 +23,14 @@
 namespace itk
 {
 
+#ifndef SWIG
 class SingleValuedNonLinearOptimizer;
 template<class T, class U> class ImageToImageMetric;
+class Command;
+class EventObject;
+#endif
+
+
 
 namespace simple
 {
@@ -37,6 +43,7 @@ namespace simple
   public:
 
     typedef ImageRegistrationMethod Self;
+    typedef ProcessObject Superclass;
 
     ImageRegistrationMethod();
     virtual ~ImageRegistrationMethod();
@@ -128,6 +135,9 @@ namespace simple
     template <class TImageType>
       itk::ImageToImageMetric<TImageType,TImageType>* CreateMetric( );
 
+    virtual void PreUpdate( itk::ProcessObject *p );
+    virtual void OnActiveProcessDelete( ) throw();
+    virtual void PreUpdateAddObserver( itk::ProcessObject *, const itk::EventObject &, itk::Command *);
 
   private:
 

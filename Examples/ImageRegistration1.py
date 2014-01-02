@@ -24,6 +24,11 @@ import sys
 import os
 
 
+def command_iteration(method) :
+    print("{0} = {1} : {2}".format(method.GetOptimizerIteration(),
+                                   method.GetMetricValue(),
+                                   method.GetOptimizerPosition()))
+
 if len ( sys.argv ) < 4:
     print( "Usage: {0} <fixedImageFilter> <movingImageFile> <outputImageFile>".format(sys.argv[0]))
     sys.exit ( 1 )
@@ -38,10 +43,12 @@ moving = sitk.VectorIndexSelectionCast(movingInput,0,sitk.sitkFloat32)
 
 R = sitk.ImageRegistrationMethod()
 R.SetMetricAsMeanSquares()
-R.SetOptimizerAsRegularStepGradientDescent(4.0, .001, 200 )
+R.SetOptimizerAsRegularStepGradientDescent(4.0, .01, 200 )
 #R.SetOptimizerAsLBFGS(1,0.1,0.5,1000)
 R.SetTransform(sitk.Transform(fixed.GetDimension(), sitk.sitkTranslation))
 R.SetInterpolator(sitk.sitkLinear)
+
+R.AddCommand( sitk.sitkIterationEvent, lambda: command_iteration(R) )
 
 outTx = R.Execute(fixed, moving)
 
