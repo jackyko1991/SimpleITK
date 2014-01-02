@@ -5,6 +5,8 @@ set ( SimpleITKCommonSource
   sitkTransform.cxx
   sitkCommand.cxx
   sitkMemberCommand.cxx
+  sitkProcessEventWatcher.cxx
+  sitkBasicFilterWatcher.cxx
   sitkPixelIDValues.cxx
   sitkExceptionObject.cxx
   sitkVersion.cxx

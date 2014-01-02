@@ -137,6 +137,8 @@ namespace std
 %include "sitkImage.h"
 %include "sitkTransform.h"
 %include "sitkCommand.h"
+%include "sitkProcessEventWatcher.h"
+%include "sitkBasicFilterWatcher.h"
 
 
 %include "sitkInterpolator.h"

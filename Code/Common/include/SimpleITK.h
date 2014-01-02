@@ -37,6 +37,8 @@
 #include "sitkImageFilter.h"
 #include "sitkCommand.h"
 #include "sitkMemberCommand.h"
+#include "sitkProcessEventWatcher.h"
+#include "sitkBasicFilterWatcher.h"
 
 // IO classes
 #include "sitkImageFileReader.h"
