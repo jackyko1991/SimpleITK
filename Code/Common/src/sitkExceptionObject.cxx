@@ -50,6 +50,20 @@ GenericException::GenericException( const GenericException &e ) throw()
     }
 }
 
+
+GenericException::GenericException( const itk::ExceptionObject &e ) throw()
+  : std::exception( e )
+{
+  try
+    {
+      m_PimpleException =  new itk::ExceptionObject( e );
+    }
+  catch(...) // prevent exception from leaving constructor
+    {
+    this->m_PimpleException = NULL;
+    }
+}
+
 GenericException::GenericException(const char *file, unsigned int lineNumber) throw()
 {
   try

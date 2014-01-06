@@ -49,6 +49,7 @@ public:
    * copied. */
   GenericException()  throw();
   GenericException( const GenericException &e )  throw();
+  GenericException( const itk::ExceptionObject &e )  throw();
 
   /** Constructor. Needed to ensure the exception object can be copied. */
   GenericException(const char *file, unsigned int lineNumber) throw();

@@ -1,8 +1,31 @@
 
   this->PreUpdate( filter.GetPointer() );
 
-  // Run the ITK filter and return the output as a SimpleITK image
-  filter->Update();
+  typename FilterType::OutputImageType *itkOutImage = NULL;
+
+  try
+    {
+    // Run the ITK filter and return the output as a SimpleITK image
+    filter->Update();
+    itkOutImage = filter->GetOutput();
+    }
+  catch (itk::ProcessAborted &e)
+    {
+    // check if output image is valid
+    itkOutImage = filter->GetOutput();
+    if (itkOutImage->GetLargestPossibleRegion() !=
+        itkOutImage->GetBufferedRegion())
+      {
+      // make ITK image zero sized
+      typename FilterType::OutputImageType::RegionType region;
+      itkOutImage->SetRegions(region);
+      itkOutImage->Allocate();
+      }
+    }
+  catch (itk::ExceptionObject &e)
+    {
+    throw GenericException(e);
+    }
 
 $(when measurements $(foreach measurements
 $(if custom_itk_cast then
@@ -12,6 +35,5 @@ OUT=[[  this->m_${name} = filter->Get${name}();]]
 end)
 ))
 
-  typename FilterType::OutputImageType *itkOutImage = filter->GetOutput();
   this->FixNonZeroIndex( itkOutImage );
   return Image( this->CastITKToImage(itkOutImage) );
