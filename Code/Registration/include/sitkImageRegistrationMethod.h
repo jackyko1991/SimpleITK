@@ -141,6 +141,10 @@ namespace simple
 
   private:
 
+    std::tr1::function<unsigned int()> m_pfGetOptimizerIteration;
+    std::tr1::function<std::vector<double>()> m_pfGetOptimizerPosition;
+    std::tr1::function<double()> m_pfGetMetricValue;
+
     typedef Transform (ImageRegistrationMethod::*MemberFunctionType)( const Image &fixed, const Image &moving );
     friend struct detail::MemberFunctionAddressor<MemberFunctionType>;
     std::auto_ptr<detail::MemberFunctionFactory<MemberFunctionType> > m_MemberFactory;

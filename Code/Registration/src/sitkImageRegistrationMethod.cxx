@@ -15,13 +15,6 @@
 #include "itkKullbackLeiblerCompareHistogramImageToImageMetric.h"
 #include "itkMeanSquaresHistogramImageToImageMetric.h"
 
-
-#include "itkRegularStepGradientDescentBaseOptimizer.h"
-#include "itkGradientDescentOptimizer.h"
-#include "itkOnePlusOneEvolutionaryOptimizer.h"
-#include "itkExhaustiveOptimizer.h"
-#include "itkSingleValuedNonLinearVnlOptimizer.h"
-
 template< typename TValue, typename TType>
 itk::Array<TValue> sitkSTLVectorToITKArray( const std::vector< TType > & in )
 {
@@ -38,8 +31,7 @@ namespace itk
 namespace simple
 {
 
-
-
+#if 0
 class CommandIterationUpdate
   : public itk::Command
 {
@@ -105,26 +97,14 @@ public:
     else if ( rsgdOpt )
       {
       // std::cout << rsgdOpt->GetCurrentStepLength() << "   ";
-      m_sitkIRM.m_MetricValue =  rsgdOpt->GetValue();
-      m_sitkIRM.m_Iteration = rsgdOpt->GetCurrentIteration();
       }
     else if( opoeOpt )
       {
       // std::cout << opoeOpt->GetFrobeniusNorm() << "   ";
-      m_sitkIRM.m_MetricValue =  opoeOpt->GetValue();
-      m_sitkIRM.m_Iteration = opoeOpt->GetCurrentIteration();
       }
     else if ( eOpt )
       {
       // std::cout << eOpt->GetCurrentIndex() << "   ";
-      m_sitkIRM.m_MetricValue =  eOpt->GetCurrentValue();
-      m_sitkIRM.m_Iteration = m_IterationNumber;
-      }
-    else if ( vnlOpt )
-      {
-      m_sitkIRM.m_MetricValue =  vnlOpt->GetCachedValue();
-      m_sitkIRM.m_Iteration = m_IterationNumber;
-      return;
       }
     else
       {
@@ -136,6 +116,7 @@ public:
 
 };
 
+#endif
 
   ImageRegistrationMethod::ImageRegistrationMethod()
     : m_ActiveOptimizer(NULL)
@@ -524,26 +505,30 @@ public:
 
   unsigned int ImageRegistrationMethod::GetOptimizerIteration() const
   {
+    if (bool(this->m_pfGetOptimizerIteration))
+      {
+      return this->m_pfGetOptimizerIteration();
+      }
     return this->m_Iteration;
   }
 
 
   std::vector<double> ImageRegistrationMethod::GetOptimizerPosition() const
   {
-    if(this->m_ActiveOptimizer==NULL)
+    if(bool(this->m_pfGetOptimizerPosition))
       {
-      return std::vector<double>();
+      return this->m_pfGetOptimizerPosition();
       }
-
-    typedef itk::SingleValuedNonLinearOptimizer::ParametersType ParametersType;
-
-    const ParametersType &p = this->m_ActiveOptimizer->GetCurrentPosition();
-    return std::vector<double>(p.begin(),p.end());
+    return std::vector<double>();
   }
 
   double ImageRegistrationMethod::GetMetricValue() const
   {
-    return this->m_MetricValue;
+    if(bool(this->m_pfGetMetricValue))
+      {
+      return this->m_pfGetMetricValue();
+      }
+    return m_MetricValue;
   }
 
 
@@ -600,10 +585,6 @@ public:
       typename itk::SingleValuedNonLinearOptimizer::Pointer optimizer = this->CreateOptimizer();
       optimizer->UnRegister();
 
-
-      CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New(*this);
-      optimizer->AddObserver( itk::IterationEvent(), observer );
-
       registration->SetOptimizer( optimizer );
 
       typename RegistrationType::TransformType *itkTx;
@@ -636,6 +617,13 @@ public:
 
       // update measurements
       this->m_StopConditionDescription = registration->GetOptimizer()->GetStopConditionDescription();
+
+      m_MetricValue = this->GetMetricValue();
+      m_Iteration = this->GetOptimizerIteration();
+      m_pfGetOptimizerIteration = NULL;
+      m_pfGetOptimizerPosition = NULL;
+      m_pfGetMetricValue = NULL;
+
 
       return this->m_Transform;
     }

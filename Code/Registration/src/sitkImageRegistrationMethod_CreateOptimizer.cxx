@@ -27,6 +27,75 @@ itk::Array<TValue> sitkSTLVectorToITKArray( const std::vector< TType > & in )
   return out;
 }
 
+
+class OptimizerIterationUpdate
+  : public itk::Command
+{
+public:
+  typedef OptimizerIterationUpdate   Self;
+  typedef itk::Command             Superclass;
+  typedef itk::SmartPointer<Self>  Pointer;
+
+
+  itkNewMacro( Self );
+
+protected:
+  OptimizerIterationUpdate()
+    : m_Iteration(0)
+    {}
+
+  unsigned int m_Iteration;
+
+public:
+
+  typedef itk::SingleValuedNonLinearOptimizer      OptimizerType;
+  typedef const OptimizerType*                     OptimizerPointer;
+
+  unsigned int GetIteration( ) const
+    {
+      return this->m_Iteration;
+    }
+
+  void Execute(itk::Object *caller, const itk::EventObject & event)
+  {
+    Execute( (const itk::Object *)caller, event);
+  }
+
+  void Execute(const itk::Object *, const itk::EventObject & event)
+  {
+    if ( itk::StartEvent().CheckEvent( &event ) )
+      {
+      m_Iteration=0;
+      return;
+      }
+
+    if( !itk::IterationEvent().CheckEvent( &event ) )
+      {
+      return;
+      }
+    ++m_Iteration;
+
+  }
+};
+
+
+std::vector<double> _GetOptimizerPosition_Vnl( const itk::SingleValuedNonLinearVnlOptimizer *opt )
+{
+    typedef itk::SingleValuedNonLinearOptimizer::ParametersType ParametersType;
+
+    const ParametersType &p = opt->GetCachedCurrentPosition();
+    return std::vector<double>(p.begin(),p.end());
+}
+
+std::vector<double> _GetOptimizerPosition( const itk::SingleValuedNonLinearOptimizer *opt )
+{
+    typedef itk::SingleValuedNonLinearOptimizer::ParametersType ParametersType;
+
+    const ParametersType &p = opt->GetCurrentPosition();
+    return std::vector<double>(p.begin(),p.end());
+}
+
+
 }
 
 namespace itk
@@ -34,9 +103,13 @@ namespace itk
 namespace simple
 {
 
+
+
   itk::SingleValuedNonLinearOptimizer*
   ImageRegistrationMethod::CreateOptimizer( )
   {
+    OptimizerIterationUpdate::Pointer observer = OptimizerIterationUpdate::New();
+
     itk::SingleValuedNonLinearOptimizer::ScalesType scales(m_OptimizerScales.size());
     std::copy( m_OptimizerScales.begin(), m_OptimizerScales.end(), scales.begin() );
 
@@ -48,6 +121,11 @@ namespace simple
       optimizer->SetNumberOfIterations( this->m_OptimizerNumberOfIterations  );
       optimizer->SetMinimize( this->m_OptimizerMinimize );
       if (scales.GetSize()) optimizer->SetScales(scales);
+
+      this->m_pfGetMetricValue = std::tr1::bind(&_OptimizerType::GetValue,optimizer);
+      this->m_pfGetOptimizerIteration = std::tr1::bind(&_OptimizerType::GetCurrentIteration,optimizer);
+      this->m_pfGetOptimizerPosition = std::tr1::bind(&_GetOptimizerPosition,optimizer);
+
       optimizer->Register();
       return optimizer.GetPointer();
       }
@@ -74,6 +152,11 @@ namespace simple
       optimizer->SetRelaxationFactor( this->m_OptimizerRelaxationFactor );
       if (scales.GetSize()) optimizer->SetScales(scales);
       optimizer->Register();
+
+      this->m_pfGetMetricValue = std::tr1::bind(&_OptimizerType::GetValue,optimizer);
+      this->m_pfGetOptimizerIteration = std::tr1::bind(&_OptimizerType::GetCurrentIteration,optimizer);
+      this->m_pfGetOptimizerPosition = std::tr1::bind(&_GetOptimizerPosition,optimizer);
+
       return optimizer.GetPointer();
       }
     if ( m_OptimizerType == ConjugateGradient )
@@ -81,6 +164,13 @@ namespace simple
       typedef itk::ConjugateGradientOptimizer _OptimizerType;
       _OptimizerType::Pointer      optimizer     = _OptimizerType::New();
       if (scales.GetSize()) optimizer->SetScales(scales);
+
+      this->m_pfGetMetricValue = std::tr1::bind(&_OptimizerType::GetCachedValue,optimizer);
+      optimizer->AddObserver( itk::IterationEvent(), observer );
+      optimizer->AddObserver( itk::StartEvent(), observer );
+      this->m_pfGetOptimizerIteration = std::tr1::bind(&OptimizerIterationUpdate::GetIteration,observer);
+      this->m_pfGetOptimizerPosition = std::tr1::bind(&_GetOptimizerPosition_Vnl,optimizer);
+
       optimizer->Register();
       return optimizer.GetPointer();
       }
@@ -103,6 +193,10 @@ namespace simple
       optimizer->SetGrowthFactor( this->m_OptimizerGrowthFactor );
       optimizer->SetShrinkFactor( this->m_OptimizerShrinkFactor );
 
+      this->m_pfGetMetricValue = std::tr1::bind(&_OptimizerType::GetValue,optimizer);
+      this->m_pfGetOptimizerIteration = std::tr1::bind(&_OptimizerType::GetCurrentIteration,optimizer);
+      this->m_pfGetOptimizerPosition = std::tr1::bind(&_GetOptimizerPosition,optimizer);
+
       optimizer->Register();
       return optimizer.GetPointer();
       }
@@ -113,6 +207,12 @@ namespace simple
       optimizer->SetStepLength( this->m_OptimizerStepLength );
       optimizer->SetNumberOfSteps( sitkSTLVectorToITKArray<_OptimizerType::StepsType::ValueType>(this->m_OptimizerNumberOfSteps));
       if (scales.GetSize()) optimizer->SetScales(scales);
+
+      this->m_pfGetMetricValue = std::tr1::bind(&_OptimizerType::GetCurrentValue,optimizer);
+      optimizer->AddObserver( itk::IterationEvent(), observer );
+      optimizer->AddObserver( itk::StartEvent(), observer );
+      this->m_pfGetOptimizerIteration = std::tr1::bind(&OptimizerIterationUpdate::GetIteration,observer);
+      this->m_pfGetOptimizerPosition = std::tr1::bind(&_GetOptimizerPosition,optimizer);
 
       optimizer->Register();
       return optimizer.GetPointer();
@@ -130,6 +230,12 @@ namespace simple
       simplexDelta.Fill( this->m_OptimizerSimplexDelta );
       optimizer->SetInitialSimplexDelta( simplexDelta );
 
+      this->m_pfGetMetricValue = std::tr1::bind(&_OptimizerType::GetCachedValue,optimizer);
+      optimizer->AddObserver( itk::IterationEvent(), observer );
+      optimizer->AddObserver( itk::StartEvent(), observer );
+      this->m_pfGetOptimizerIteration = std::tr1::bind(&OptimizerIterationUpdate::GetIteration,observer);
+      this->m_pfGetOptimizerPosition = std::tr1::bind(&_GetOptimizerPosition_Vnl,optimizer);
+
       optimizer->Register();
       return optimizer.GetPointer();
       }
@@ -145,6 +251,12 @@ namespace simple
        optimizer->SetMaximumNumberOfFunctionEvaluations( this->m_OptimizerMaximumNumberOfFunctionEvaluations );
 
       if (scales.GetSize()) optimizer->SetScales(scales);
+
+      this->m_pfGetMetricValue = std::tr1::bind(&_OptimizerType::GetCachedValue,optimizer);
+      optimizer->AddObserver( itk::IterationEvent(), observer );
+      optimizer->AddObserver( itk::StartEvent(), observer );
+      this->m_pfGetOptimizerIteration = std::tr1::bind(&OptimizerIterationUpdate::GetIteration,observer);
+      this->m_pfGetOptimizerPosition = std::tr1::bind(&_GetOptimizerPosition_Vnl,optimizer);
 
       optimizer->Register();
       return optimizer.GetPointer();
