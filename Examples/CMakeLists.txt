@@ -17,7 +17,11 @@ add_executable ( BufferImportExport BufferImportExport.cxx )
 target_link_libraries ( BufferImportExport ${SimpleITK_LIBRARIES} )
 
 add_executable ( FilterProgressReporting FilterProgressReporting.cxx )
-target_link_libraries ( FilterProgressReporting ${SimpleITK_LIBRARIES} )
+target_link_libraries ( FilterProgressReporting ${SimpleITK_LIBRARIES}
+  )
+
+add_executable ( FilterProgressWatching FilterProgressWatching.cxx )
+target_link_libraries ( FilterProgressWatching ${SimpleITK_LIBRARIES} )
 
 
 # Add subdirectories
