@@ -105,21 +105,21 @@ namespace itk {
 
       /** The number of threads used when executing a filter if the
       * filter is multi-threaded */
-      void SetNumberOfThreads(unsigned int n);
-      unsigned int GetNumberOfThreads() const;
+      virtual void SetNumberOfThreads(unsigned int n);
+      virtual unsigned int GetNumberOfThreads() const;
 
-      int AddCommand( itk::simple::EventEnum event, itk::simple::Command *cmd);
-      // Command GetCommand( int cmdID );
-      //void RemoveCommand( int cmdID );
-      void RemoveAllCommands();
-      bool HasCommand( itk::simple::EventEnum event ) const;
+      virtual int AddCommand( itk::simple::EventEnum event, itk::simple::Command *cmd);
+      // virtual Command GetCommand( int cmdID );
+      // virtual void RemoveCommand( int cmdID );
+      virtual void RemoveAllCommands();
+      virtual bool HasCommand( itk::simple::EventEnum event ) const;
 
       /** Get the execution progress of a process object. The progress
        * is a floating number in [0,1] with 0 meaning no progress and 1
        * meaning the filter has completed execution. */
-      float GetProgress( ) const;
+      virtual float GetProgress( ) const;
 
-      void Abort();
+      virtual void Abort();
 
     protected:
 

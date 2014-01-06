@@ -323,7 +323,7 @@ void ProcessObject::PreUpdate( itk::ProcessObject *p )
 
     SimpleAdaptorCommand::Pointer itkCommand = SimpleAdaptorCommand::New();
     itkCommand->SetSimpleCommand(cmd);
-
+    itkCommand->SetObjectName(itkCommand->GetObjectName()+" "+itkEvent.GetEventName());
     this->PreUpdateAddObserver(p, itkEvent, itkCommand );
     }
 
