@@ -45,6 +45,8 @@ public:
 
 protected:
 
+  virtual ProcessObject &GetProcessObject();
+
   virtual void OnAbortEvent( );
   virtual void OnEndEvent( );
   virtual void OnStartEvent( );

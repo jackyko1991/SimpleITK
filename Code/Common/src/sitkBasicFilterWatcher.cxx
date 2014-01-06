@@ -66,7 +66,7 @@ void BasicFilterWatcher::OnAbortEvent( )
 {
   this->Superclass::OnAbortEvent( );
   m_TimeProbe->Stop();
-    std::cout << std::endl << "-------Aborted" << std::endl << std::flush;
+  std::cout << std::endl << "-------Aborted" << std::endl << std::flush;
 }
 
 /** Callback method to show the IterationEvent */

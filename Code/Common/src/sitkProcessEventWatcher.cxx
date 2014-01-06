@@ -47,6 +47,10 @@ unsigned int ProcessEventWatcher::GetIterationNumber( void ) const
   return this->m_IterationNumber;
 }
 
+ProcessObject &ProcessEventWatcher::GetProcessObject()
+{
+  return this->m_Process;
+}
 
 void ProcessEventWatcher::OnAbortEvent( )
 {
