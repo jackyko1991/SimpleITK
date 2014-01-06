@@ -33,12 +33,19 @@ if len ( sys.argv ) < 4:
     print( "Usage: {0} <fixedImageFilter> <movingImageFile> <outputImageFile>".format(sys.argv[0]))
     sys.exit ( 1 )
 
+pixelType = sitk.sitkFloat32
 
 fixedInput = sitk.ReadImage(sys.argv[1])
-fixed = sitk.VectorIndexSelectionCast(fixedInput,0,sitk.sitkFloat32)
+if fixedInput.GetNumberOfComponentsPerPixel() > 1:
+    fixed = sitk.VectorIndexSelectionCast(fixedInput,0,pixelType)
+else:
+    fixed = sitk.Cast(fixedInput,pixelType)
 
 movingInput = sitk.ReadImage(sys.argv[2])
-moving = sitk.VectorIndexSelectionCast(movingInput,0,sitk.sitkFloat32)
+if movingInput.GetNumberOfComponentsPerPixel() > 1:
+    moving = sitk.VectorIndexSelectionCast(movingInput,0,pixelType)
+else:
+    moving = sitk.Cast(movingInput,pixelType)
 
 
 R = sitk.ImageRegistrationMethod()
@@ -66,9 +73,14 @@ resampler.SetDefaultPixelValue(100)
 resampler.SetTransform(outTx)
 
 outImg = resampler.Execute(movingInput)
+sitk.WriteImage(outImg, sys.argv[3])
 
 if ( not "SITK_NOSHOW" in os.environ ):
-    sitk.Show( outImg, "ImgeRegistration1" )
+    out = resampler.Execute(moving)
+    simg1 = sitk.Cast(sitk.RescaleIntensity(fixed), sitk.sitkUInt8)
+    simg2 = sitk.Cast(sitk.RescaleIntensity(out), sitk.sitkUInt8)
+    cimg = sitk.Compose(simg1, simg2, simg1/2.+simg2/2.)
+    sitk.Show( cimg, "ImageRegistration1 Composition" )
 
 
-sitk.WriteImage(outImg, sys.argv[3])
+

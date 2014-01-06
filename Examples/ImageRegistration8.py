@@ -29,18 +29,24 @@ if len ( sys.argv ) < 4:
     sys.exit ( 1 )
 
 
+def command_iteration(method) :
+    print("{0} = {1} : {2}".format(method.GetOptimizerIteration(),
+                                   method.GetMetricValue(),
+                                   method.GetOptimizerPosition()))
+
+pixelType = sitk.sitkFloat32
+
 fixedInput = sitk.ReadImage(sys.argv[1])
 if fixedInput.GetNumberOfComponentsPerPixel() > 1:
-    fixed = sitk.VectorIndexSelectionCast(fixedInput,0,sitk.sitkFloat32)
+    fixed = sitk.VectorIndexSelectionCast(fixedInput,0,pixelType)
 else:
-    fixed = sitk.Cast(fixedInput,sitk.sitkFloat32)
+    fixed = sitk.Cast(fixedInput,pixelType)
 
 movingInput = sitk.ReadImage(sys.argv[2])
 if movingInput.GetNumberOfComponentsPerPixel() > 1:
-    moving = sitk.VectorIndexSelectionCast(movingInput,0,sitk.sitkFloat32)
+    moving = sitk.VectorIndexSelectionCast(movingInput,0,pixelType)
 else:
-    moving = sitk.Cast(movingInput,sitk.sitkFloat32)
-
+    moving = sitk.Cast(movingInput,pixelType)
 
 R = sitk.ImageRegistrationMethod()
 R.SetMetricAsMeanSquares()
@@ -49,10 +55,16 @@ R.SetOptimizerScales([5.0, 5.0, 5.0, .01, .01, .01])
 R.SetTransform(sitk.Transform(fixed.GetDimension(), sitk.sitkVersorRigid))
 R.SetInterpolator(sitk.sitkLinear)
 
+R.AddCommand( sitk.sitkIterationEvent, lambda: command_iteration(R) )
+
 outTx = R.Execute(fixed, moving)
 
 print("-------")
 print(outTx)
+print("Optimizer stop condition: {0}".format(R.GetOptimizerStopConditionDescription()))
+print(" Iteration: {0}".format(R.GetOptimizerIteration()))
+print(" Metric value: {0}".format(R.GetMetricValue()))
+
 
 resampler = sitk.ResampleImageFilter()
 resampler.SetReferenceImage(fixed);
@@ -61,9 +73,12 @@ resampler.SetDefaultPixelValue(100)
 resampler.SetTransform(outTx)
 
 outImg = resampler.Execute(movingInput)
-
-#if ( not "SITK_NOSHOW" in os.environ ):
-sitk.Show( sitk.Compose(sitk.Cast(outImg, sitk.sitkUInt8),
-                        sitk.Cast(fixed, sitk.sitkUInt8),
-                        sitk.Cast(outImg, sitk.sitkUInt8) ) , "CheckerBoard" )
+s
 sitk.WriteImage(outImg, sys.argv[3])
+
+if ( not "SITK_NOSHOW" in os.environ ):
+    out = resampler.Execute(moving)
+    simg1 = sitk.Cast(sitk.RescaleIntensity(fixed), sitk.sitkUInt8)
+    simg2 = sitk.Cast(sitk.RescaleIntensity(out), sitk.sitkUInt8)
+    cimg = sitk.Compose(simg1, simg2, simg1/2.+simg2/2.)
+    sitk.Show( cimg, "ImageRegistration8 Composition" )

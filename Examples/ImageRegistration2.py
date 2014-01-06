@@ -24,42 +24,67 @@ import sys
 import os
 
 
+def command_iteration(method) :
+    print("{0} = {1} : {2}".format(method.GetOptimizerIteration(),
+                                   method.GetMetricValue(),
+                                   method.GetOptimizerPosition()))
+
+
+
 if len ( sys.argv ) < 4:
     print( "Usage: {0} <fixedImageFilter> <movingImageFile> <outputImageFile>".format(sys.argv[0]))
     sys.exit ( 1 )
 
+pixelType = sitk.sitkFloat32
 
 fixedInput = sitk.ReadImage(sys.argv[1])
-fixed = sitk.VectorIndexSelectionCast(fixedInput,0,sitk.sitkFloat32)
+if fixedInput.GetNumberOfComponentsPerPixel() > 1:
+    fixed = sitk.VectorIndexSelectionCast(fixedInput,0,pixelType)
+else:
+    fixed = sitk.Cast(fixedInput,pixelType)
 fixed = sitk.Normalize(fixed)
 fixed = sitk.DiscreteGaussian( fixed, 2.0 )
 
 
 movingInput = sitk.ReadImage(sys.argv[2])
-moving = sitk.VectorIndexSelectionCast(movingInput,0,sitk.sitkFloat32)
+if movingInput.GetNumberOfComponentsPerPixel() > 1:
+    moving = sitk.VectorIndexSelectionCast(movingInput,0,pixelType)
+else:
+    moving = sitk.Cast(movingInput,pixelType)
 moving = sitk.Normalize(moving)
 moving = sitk.DiscreteGaussian( moving, 2.0)
 
 
 R = sitk.ImageRegistrationMethod()
 R.SetMetricAsMutualInformation(0.4, 0.4, 0)
-R.SetOptimizerAsGradientDescent( 15, 200 )
+R.SetOptimizerAsGradientDescent( 10, 200 )
 R.SetTransform(sitk.Transform(fixed.GetDimension(), sitk.sitkTranslation))
 R.SetInterpolator(sitk.sitkLinear)
+
+R.AddCommand( sitk.sitkIterationEvent, lambda: command_iteration(R) )
 
 outTx = R.Execute(fixed, moving)
 
 
+print("-------")
+print(outTx)
+print("Optimizer stop condition: {0}".format(R.GetOptimizerStopConditionDescription()))
+print(" Iteration: {0}".format(R.GetOptimizerIteration()))
+print(" Metric value: {0}".format(R.GetMetricValue()))
+
 resampler = sitk.ResampleImageFilter()
 resampler.SetReferenceImage(fixed);
 resampler.SetInterpolator(sitk.sitkLinear)
-resampler.SetDefaultPixelValue(100)
+resampler.SetDefaultPixelValue(1)
 resampler.SetTransform(outTx)
 
 outImg = resampler.Execute(movingInput)
+sitk.WriteImage(outImg, sys.argv[3])
 
 if ( not "SITK_NOSHOW" in os.environ ):
-    sitk.Show( outImg, "ImgeRegistration1" )
+    out = resampler.Execute(moving)
+    simg1 = sitk.Cast(sitk.RescaleIntensity(fixed), sitk.sitkUInt8)
+    simg2 = sitk.Cast(sitk.RescaleIntensity(out), sitk.sitkUInt8)
+    cimg = sitk.Compose(simg1, simg2, simg1/2.+simg2/2.)
+    sitk.Show( cimg, "ImageRegistration2 Composition" )
 
-
-sitk.WriteImage(outImg, sys.argv[3])

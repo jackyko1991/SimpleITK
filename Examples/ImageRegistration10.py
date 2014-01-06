@@ -24,6 +24,11 @@ import sys
 import os
 
 
+def command_iteration(method) :
+     print("{0} = {1} : {2}".format(method.GetOptimizerIteration(),
+                                   method.GetMetricValue(),
+                                   method.GetOptimizerPosition()))
+
 if len ( sys.argv ) < 4:
     print( "Usage: {0} <fixedImageFilter> <movingImageFile> <outputImageFile>".format(sys.argv[0]))
     sys.exit ( 1 )
@@ -48,10 +53,12 @@ tx.SetParameters( [-11,-13] )
 R = sitk.ImageRegistrationMethod()
 R.SetMetricAsMatchCardinality(False, 5000)
 R.SetOptimizerAsAmoeba(5.0,0.25,.001,500)
-#R.SetOptimizerScales([.2,.2])
+R.SetOptimizerScales([.2,.2])
 R.SetTransform(tx)
 R.SetInterpolator(sitk.sitkNearestNeighbor)
-R.DebugOn()
+
+R.AddCommand( sitk.sitkIterationEvent, lambda: command_iteration(R) )
+
 outTx = R.Execute(fixed, moving)
 
 print("-------")
@@ -62,12 +69,14 @@ print(" Metric value: {0}".format(R.GetMetricValue()))
 
 resampler = sitk.ResampleImageFilter()
 resampler.SetReferenceImage(fixed);
-resampler.SetInterpolator(sitk.sitkLinear)
-resampler.SetDefaultPixelValue(100)
+resampler.SetInterpolator(sitk.sitkLabelGaussian)
+resampler.SetDefaultPixelValue(0)
 resampler.SetTransform(outTx)
 
 outImg = resampler.Execute(moving)
 
-#if ( not "SITK_NOSHOW" in os.environ ):
-#sitk.Show( sitk.CheckerBoard( outImg, fixed, [10,10] ) , "CheckerBoard" )
-#sitk.WriteImage(outImg, sys.argv[3])
+sitk.WriteImage(outImg, sys.argv[3])
+
+if ( not "SITK_NOSHOW" in os.environ ):
+     sitk.Show( sitk.LabelToRGB(sitk.CheckerBoard( outImg, fixed, [10,10] ) ), "ImageRegistration10 CheckerBoard" )
+
