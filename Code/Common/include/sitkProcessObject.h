@@ -108,7 +108,7 @@ namespace itk {
       virtual void SetNumberOfThreads(unsigned int n);
       virtual unsigned int GetNumberOfThreads() const;
 
-      virtual int AddCommand( itk::simple::EventEnum event, itk::simple::Command *cmd);
+      virtual int AddCommand( itk::simple::EventEnum event, itk::simple::Command &cmd);
       // virtual Command GetCommand( int cmdID );
       // virtual void RemoveCommand( int cmdID );
       virtual void RemoveAllCommands();

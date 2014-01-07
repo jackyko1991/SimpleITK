@@ -246,13 +246,11 @@ unsigned int ProcessObject::GetNumberOfThreads() const
 }
 
 
-int ProcessObject::AddCommand( EventEnum event, Command *cmd)
+int ProcessObject::AddCommand( EventEnum event, Command &cmd)
 {
-  if (cmd)
-    {
-    m_Commands.push_back(EventCommandPairType(event,cmd));
-    cmd->AddProcessObject(this);
-    }
+  m_Commands.push_back(EventCommandPairType(event,&cmd));
+  cmd.AddProcessObject(this);
+
   return 0;
 }
 

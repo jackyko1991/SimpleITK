@@ -37,15 +37,15 @@ BasicFilterWatcher::BasicFilterWatcher(ProcessObject& o, const std::string &comm
 
   BasicFilterWatcher *self = this;
   m_MemberCommands[0].SetCallbackFunction(self, &Self::OnProgressEvent);
-  o.AddCommand(sitkProgressEvent, &m_MemberCommands[0]);
+  o.AddCommand(sitkProgressEvent, m_MemberCommands[0]);
   m_MemberCommands[1].SetCallbackFunction(self, &Self::OnAbortEvent);
-  o.AddCommand(sitkAbortEvent, &m_MemberCommands[1]);
+  o.AddCommand(sitkAbortEvent, m_MemberCommands[1]);
   m_MemberCommands[2].SetCallbackFunction(self, &Self::OnIterationEvent);
-  o.AddCommand(sitkIterationEvent, &m_MemberCommands[2]);
+  o.AddCommand(sitkIterationEvent, m_MemberCommands[2]);
   m_MemberCommands[3].SetCallbackFunction(self, &Self::OnStartEvent);
-  o.AddCommand(sitkStartEvent, &m_MemberCommands[3]);
+  o.AddCommand(sitkStartEvent, m_MemberCommands[3]);
   m_MemberCommands[4].SetCallbackFunction(self, &Self::OnEndEvent);
-  o.AddCommand(sitkEndEvent, &m_MemberCommands[4]);
+  o.AddCommand(sitkEndEvent, m_MemberCommands[4]);
 }
 
 BasicFilterWatcher::~BasicFilterWatcher(void)
