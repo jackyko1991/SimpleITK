@@ -62,7 +62,7 @@ int main ( int argc, char* argv[] ) {
   gaussian.SetVariance ( atof ( argv[2] ) );
 
   ProgressUpdate cmd(gaussian);
-  gaussian.AddCommand( sitk::sitkProgressEvent, &cmd );
+  gaussian.AddCommand( sitk::sitkProgressEvent, cmd );
 
   sitk::Image blurredImage = gaussian.Execute ( image );
 

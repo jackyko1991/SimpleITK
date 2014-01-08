@@ -197,7 +197,7 @@ namespace std
      {
        cmd = new itk::simple::PyCommand();
        cmd->SetCommandCallable(obj);
-       int ret = self->AddCommand(e,cmd);
+       int ret = self->AddCommand(e,*cmd);
        cmd->OwnedByProcessObjectsOn();
        return ret;
      }
