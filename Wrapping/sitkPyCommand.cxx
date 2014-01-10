@@ -26,6 +26,27 @@
 
 #include <iostream>
 
+namespace
+{
+// Wrapper to automatics obtain and release GIL
+// RAII idiom
+class PyGILStateEnsure
+{
+public:
+  PyGILStateEnsure()
+    {
+      m_GIL = PyGILState_Ensure();
+    }
+  ~PyGILStateEnsure()
+    {
+      PyGILState_Release(m_GIL);
+    }
+private:
+  PyGILState_STATE m_GIL;
+};
+
+}
+
 namespace itk
 {
 namespace simple
@@ -42,6 +63,7 @@ PyCommand::~PyCommand()
 {
   if (this->m_Object)
     {
+    PyGILStateEnsure gil;
     Py_DECREF(this->m_Object);
     }
   this->m_Object = NULL;
@@ -51,6 +73,7 @@ void PyCommand::SetCommandCallable(PyObject *o)
 {
   if (o != this->m_Object)
     {
+    PyGILStateEnsure gil;
     if (this->m_Object)
       {
       // get rid of our reference
@@ -92,6 +115,8 @@ void PyCommand::PyExecute()
     }
   else
     {
+    PyGILStateEnsure gil;
+
     PyObject *result;
 
     result = PyObject_CallObject(this->m_Object, (PyObject *)NULL);
