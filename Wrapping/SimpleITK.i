@@ -147,6 +147,20 @@ namespace std
 %include "sitkKernel.h"
 %include "sitkEvent.h"
 
+%template(ImageFilterExecuteBase_0) itk::simple::ImageFilterExecuteBase<0>;
+%template(ImageFilterExecuteBase_1) itk::simple::ImageFilterExecuteBase<1>;
+%template(ImageFilterExecuteBase_2) itk::simple::ImageFilterExecuteBase<2>;
+%template(ImageFilterExecuteBase_3) itk::simple::ImageFilterExecuteBase<3>;
+%template(ImageFilterExecuteBase_4) itk::simple::ImageFilterExecuteBase<4>;
+%template(ImageFilterExecuteBase_5) itk::simple::ImageFilterExecuteBase<5>;
+
+%template(ImageFilter_0) itk::simple::ImageFilter<0>;
+%template(ImageFilter_1) itk::simple::ImageFilter<1>;
+%template(ImageFilter_2) itk::simple::ImageFilter<2>;
+%template(ImageFilter_3) itk::simple::ImageFilter<3>;
+%template(ImageFilter_4) itk::simple::ImageFilter<4>;
+%template(ImageFilter_5) itk::simple::ImageFilter<5>;
+
 %include "sitkShow.h"
 %include "sitkImageFileWriter.h"
 %include "sitkImageSeriesReader.h"
@@ -162,21 +176,6 @@ namespace std
 %include "sitkVersion.h"
 
 %include "sitkImageRegistrationMethod.h"
-
-%template(ImageFilterExecuteBase_0) itk::simple::ImageFilterExecuteBase<0>;
-%template(ImageFilterExecuteBase_1) itk::simple::ImageFilterExecuteBase<1>;
-%template(ImageFilterExecuteBase_2) itk::simple::ImageFilterExecuteBase<2>;
-%template(ImageFilterExecuteBase_3) itk::simple::ImageFilterExecuteBase<3>;
-%template(ImageFilterExecuteBase_4) itk::simple::ImageFilterExecuteBase<4>;
-%template(ImageFilterExecuteBase_5) itk::simple::ImageFilterExecuteBase<5>;
-
-%template(ImageFilter_0) itk::simple::ImageFilter<0>;
-%template(ImageFilter_1) itk::simple::ImageFilter<1>;
-%template(ImageFilter_2) itk::simple::ImageFilter<2>;
-%template(ImageFilter_3) itk::simple::ImageFilter<3>;
-%template(ImageFilter_4) itk::simple::ImageFilter<4>;
-%template(ImageFilter_5) itk::simple::ImageFilter<5>;
-
 // Only C# can handle import filter
 #if SWIGCSHARP
 %include "sitkImportImageFilter.h"
