@@ -169,6 +169,7 @@ public:
   {
     m_MetricType = MeanSquares;
     m_MetricNumberOfSpatialSamples = numberOfSpatialSamples;
+    this->m_OptimizerMinimize = true;
     return *this;
   }
 
@@ -177,6 +178,7 @@ public:
   {
     m_MetricType = NormalizedCorrelation;
     m_MetricSubtractMean = subtractMean;
+    this->m_OptimizerMinimize = true;
     return *this;
   }
 
@@ -186,6 +188,7 @@ public:
     m_MetricType = MeanReciprocalSquareDifference;
     m_MetricLambda = _lambda;
     m_MetricDelta = delta;
+    this->m_OptimizerMinimize = true;
     return *this;
   }
 
@@ -198,6 +201,7 @@ public:
    m_MetricFixedImageStandardDeviation = fixedImageStandardDeviation;
    m_MetricMovingImageStandardDeviation = movingImageStandardDeviation;
    m_MetricNumberOfSpatialSamples = numberOfSpatialSamples;
+   this->m_OptimizerMinimize = false;
    return *this;
   }
 
@@ -210,6 +214,7 @@ public:
     m_MetricNumberOfHistogramBins = numberOfHistogramBins;
     m_MetricUseExplicitPDFDerivatives = useExplicitPDFDerivatives;
     m_MetricNumberOfSpatialSamples = numberOfSpatialSamples;
+    this->m_OptimizerMinimize = true;
     return *this;
   }
 
@@ -220,6 +225,7 @@ public:
     m_MetricType = MatchCardinality;
     m_MetricMeasureMatches = measureMatches;
     m_MetricNumberOfSpatialSamples = numberOfSpatialSamples;
+    this->m_OptimizerMinimize = !m_MetricMeasureMatches;
     return *this;
   }
 
@@ -232,6 +238,7 @@ public:
     m_MetricType = KullbackLeiblerCompareHistogram;
     m_MetricEpsilon = epsilon;
     m_MetricHistogramSize = histogramSize;
+    this->m_OptimizerMinimize = true;
     return *this;
   }
 
@@ -240,6 +247,7 @@ public:
   {
     m_MetricType = NormalizedMutualInformationHistogram;
     m_MetricHistogramSize = histogramSize;
+    this->m_OptimizerMinimize = false;
     return *this;
   }
 
@@ -248,6 +256,7 @@ public:
   {
     m_MetricType = MeanSquaresHistogram;
     m_MetricHistogramSize = histogramSize;
+    this->m_OptimizerMinimize = true;
     return *this;
   }
 
@@ -271,7 +280,6 @@ public:
           {
           metric->SetNumberOfSpatialSamples( this->m_MetricNumberOfSpatialSamples );
           }
-        this->m_OptimizerMinimize = true;
 
         metric->Register();
         return metric.GetPointer();
@@ -281,8 +289,6 @@ public:
         typedef itk::NormalizedCorrelationImageToImageMetric< FixedImageType, MovingImageType >    _MetricType;
         typename _MetricType::Pointer         metric        = _MetricType::New();
         metric->SetSubtractMean(this->m_MetricSubtractMean);
-
-        this->m_OptimizerMinimize = true;
 
         metric->Register();
         return metric.GetPointer();
@@ -294,8 +300,6 @@ public:
         typename _MetricType::Pointer         metric        = _MetricType::New();
         metric->SetLambda(this->m_MetricLambda);
         metric->SetDelta(this->m_MetricDelta);
-
-        this->m_OptimizerMinimize = true;
 
         metric->Register();
         return metric.GetPointer();
@@ -313,8 +317,6 @@ public:
           metric->SetNumberOfSpatialSamples( this->m_MetricNumberOfSpatialSamples );
           }
 
-        this->m_OptimizerMinimize = false;
-
         metric->Register();
         return metric.GetPointer();
         break;
@@ -331,8 +333,6 @@ public:
           metric->SetNumberOfSpatialSamples( this->m_MetricNumberOfSpatialSamples );
           }
 
-        this->m_OptimizerMinimize = true;
-
         metric->Register();
         return metric.GetPointer();
         break;
@@ -348,8 +348,6 @@ public:
           metric->SetNumberOfSpatialSamples( this->m_MetricNumberOfSpatialSamples );
           }
 
-        this->m_OptimizerMinimize = !m_MetricMeasureMatches;
-
         metric->Register();
         return metric.GetPointer();
         break;
@@ -360,7 +358,6 @@ public:
         typename _MetricType::Pointer         metric        = _MetricType::New();
         metric->SetEpsilon(this->m_MetricEpsilon);
         metric->SetHistogramSize(sitkSTLVectorToITKArray<typename _MetricType::HistogramSizeType::ValueType>(this->m_MetricHistogramSize));
-        this->m_OptimizerMinimize = true;
 
         metric->Register();
         return metric.GetPointer();
@@ -371,7 +368,6 @@ public:
         typedef itk::NormalizedMutualInformationHistogramImageToImageMetric< FixedImageType, MovingImageType >    _MetricType;
         typename _MetricType::Pointer         metric        = _MetricType::New();
         metric->SetHistogramSize(sitkSTLVectorToITKArray<typename _MetricType::HistogramSizeType::ValueType>(this->m_MetricHistogramSize));
-        this->m_OptimizerMinimize = false;
 
         metric->Register();
         return metric.GetPointer();
@@ -382,7 +378,6 @@ public:
         typedef itk::MeanSquaresHistogramImageToImageMetric< FixedImageType, MovingImageType >    _MetricType;
         typename _MetricType::Pointer         metric        = _MetricType::New();
         metric->SetHistogramSize(sitkSTLVectorToITKArray<typename _MetricType::HistogramSizeType::ValueType>(this->m_MetricHistogramSize));
-        this->m_OptimizerMinimize = true;
 
         metric->Register();
         return metric.GetPointer();
@@ -592,6 +587,7 @@ public:
         {
         sitkExceptionMacro( "Unexpected error converting transform! Possible miss matching dimensions!" );
         }
+
       registration->SetTransform( itkTx );
 
       registration->SetInitialTransformParameters(itkTx->GetParameters());
