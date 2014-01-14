@@ -44,7 +44,7 @@ void Command::Execute(void)
 
 size_t Command::AddProcessObject(itk::simple::ProcessObject *o)
 {
-  m_ReferencedObjects.insert(o).second;
+  m_ReferencedObjects.insert(o);
   return m_ReferencedObjects.size();
 }
 
