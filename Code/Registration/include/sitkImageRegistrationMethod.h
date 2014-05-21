@@ -38,6 +38,7 @@ template<typename TFixedImageType,
          typename TCoordRep>
 class DefaultImageToImageMetricTraitsv4;
 
+template<unsigned int VDimension> class SpatialObject;
 
 class Command;
 class EventObject;
@@ -90,6 +91,10 @@ namespace simple
 
 
 
+    Self& SetMetricFixedMask( const Image &binaryMask );
+
+    Self& SetMetricMovingMask( const Image &binaryMask );
+
     Self &SetMetricSamplingPercentage(double percentage);
     Self &SetMetricSamplingPercentagePerLevel(const std::vector<double> &percentage);
 
@@ -131,6 +136,9 @@ namespace simple
     Transform ExecuteInternal ( const Image &fixed, const Image &moving );
 
     itk::ObjectToObjectOptimizerBaseTemplate<double> *CreateOptimizer( );
+
+    template<unsigned int VDimension>
+      itk::SpatialObject<VDimension> *CreateSpatialObjectMask(const Image &mask);
 
     template <class TImageType>
       itk::ImageToImageMetricv4<TImageType,
@@ -178,6 +186,8 @@ namespace simple
     };
     MetricType m_MetricType;
 
+    Image m_MetricFixedMaskImage;
+    Image m_MetricMovingMaskImage;
 
     std::vector<double> m_MetricSamplingPercentage;
     MetricSamplingStrategyType m_MetricSamplingStrategy;

@@ -1,6 +1,7 @@
 #include "sitkImageRegistrationMethod.h"
 
 #include "sitkCreateInterpolator.hxx"
+#include "itkImageMaskSpatialObject.h"
 #include "itkImage.h"
 #include "itkImageRegistrationMethodv4Generic.h"
 
@@ -192,6 +193,24 @@ ImageRegistrationMethod::SetOptimizerScales( const std::vector<double> &scales)
   return *this;
 }
 
+
+ImageRegistrationMethod::Self&
+ImageRegistrationMethod::SetMetricFixedMask( const Image &binaryMask )
+{
+  // todo
+  m_MetricFixedMaskImage = binaryMask;
+  m_MetricFixedMaskRegion.clear();
+  return *this;
+ }
+
+ImageRegistrationMethod::Self&
+ImageRegistrationMethod::SetMetricMovingMask( const Image &binaryMask )
+{
+  m_MetricMovingMaskImage = binaryMask;
+  m_MetricMovingMaskRegion.clear();
+  return *this;
+}
+
 ImageRegistrationMethod::Self&
 ImageRegistrationMethod::SetMetricSamplingPercentage(double percentage)
 {
@@ -268,6 +287,18 @@ double ImageRegistrationMethod::GetMetricValue() const
   return m_MetricValue;
 }
 
+template<unsigned int VDimension>
+itk::SpatialObject<VDimension> *
+ImageRegistrationMethod::CreateSpatialObjectMask(const Image &imageMask)
+{
+  // todo add the image to the spatial object, the spatial object only
+  // seems to support unsigned char image types.
+  typedef itk::ImageMaskSpatialObject<VDimension> SpatialObjectMaskType;
+  typename SpatialObjectMaskType::Pointer mask = SpatialObjectMaskType::New();
+  mask->Register();
+  return mask;
+}
+
 
 Transform ImageRegistrationMethod::Execute ( const Image &fixed, const Image & moving )
 {
@@ -299,6 +330,8 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
 {
   typedef TImageType     FixedImageType;
   typedef TImageType     MovingImageType;
+  const unsigned int ImageDimension = FixedImageType::ImageDimension;
+  typedef itk::SpatialObject<ImageDimension> SpatialObjectMaskType;
 
 
   typedef itk::ImageRegistrationMethodv4Generic<FixedImageType, MovingImageType>  RegistrationType;
@@ -320,6 +353,32 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
   typename MovingInterpolatorType::Pointer   movingInterpolator  = CreateInterpolator(moving.GetPointer(), m_Interpolator);
   metric->SetMovingInterpolator( movingInterpolator );
 
+  const std::vector<unsigned int> zeroSize(FixedImageType::ImageDimension,0);
+
+  if (m_MetricFixedMaskRegion.size())
+    {
+    // todo implement ImageRegionSpatialObject
+    }
+  else if ( m_MetricFixedMaskImage.GetSize() != zeroSize )
+    {
+    std::cout << "m_MetricFixedMaskImage.GetSize(): " << m_MetricFixedMaskImage.GetSize() << std::endl;
+    // const or non const?
+    typename SpatialObjectMaskType::Pointer fixedMask = this->CreateSpatialObjectMask<ImageDimension>(m_MetricFixedMaskImage);
+    fixedMask->UnRegister();
+    metric->SetFixedImageMask(fixedMask);
+    }
+
+  if (m_MetricMovingMaskRegion.size())
+    {
+    // todo implement ImageRegionSpatialObject
+    }
+  else if ( m_MetricMovingMaskImage.GetSize() != zeroSize )
+    {
+    typename SpatialObjectMaskType::Pointer movingMask = this->CreateSpatialObjectMask<ImageDimension>(m_MetricMovingMaskImage);
+    movingMask->UnRegister();
+    metric->SetMovingImageMask(movingMask);
+    }
+
   registration->SetFixedImage( fixed );
   registration->SetMovingImage( moving );
 
@@ -330,9 +389,6 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
     sitkExceptionMacro( "Number of per level parameters for shrink factors and smoothing sigmas don't match!");
     }
   registration->SetNumberOfLevels(numberOfLevels);
-
-  // set fixed/moving masks
-  // todo
 
   // set sampling
   if (m_MetricSamplingPercentage.size()==1)
@@ -372,17 +428,6 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
 
   const bool ReuseExternalTransform = true;
   registration->SetTransform( itkTx, ReuseExternalTransform );
-
-
-#if 0 //todo extra parameters
-  if (m_FixedImageRegionSize.size() && m_FixedImageRegionIndex.size())
-    {
-    typedef typename FixedImageType::RegionType RegionType;
-    RegionType r( sitkSTLVectorToITK<typename RegionType::IndexType>(m_FixedImageRegionIndex),
-                  sitkSTLVectorToITK<typename RegionType::SizeType>(m_FixedImageRegionSize) );
-    registration->SetFixedImageRegion( r );
-    }
-#endif
 
   this->m_ActiveOptimizer = optimizer;
   this->PreUpdate( registration.GetPointer() );
