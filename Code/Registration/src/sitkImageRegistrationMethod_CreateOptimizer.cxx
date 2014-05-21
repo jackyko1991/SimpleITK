@@ -56,8 +56,7 @@ namespace simple
       typedef itk::RegularStepGradientDescentOptimizerv4<InternalComputationValueType> _OptimizerType;
       _OptimizerType::Pointer      optimizer =  _OptimizerType::New();
 
-      // no maximum step length in v4?
-      //optimizer->SetMaximumStepLength( this->m_OptimizerMaximumStepLength );
+      optimizer->SetLearningRate( this->m_OptimizerLearningRate );
       optimizer->SetMinimumStepLength( this->m_OptimizerMinimumStepLength );
       optimizer->SetNumberOfIterations( this->m_OptimizerNumberOfIterations  );
       optimizer->SetRelaxationFactor( this->m_OptimizerRelaxationFactor );
