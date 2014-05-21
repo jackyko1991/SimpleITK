@@ -205,6 +205,8 @@ namespace simple
 
     Image m_MetricFixedMaskImage;
     Image m_MetricMovingMaskImage;
+    std::vector<unsigned int> m_MetricFixedMaskRegion;
+    std::vector<unsigned int> m_MetricMovingMaskRegion;
 
     std::vector<double> m_MetricSamplingPercentage;
     MetricSamplingStrategyType m_MetricSamplingStrategy;
