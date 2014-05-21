@@ -5,6 +5,9 @@
 #include "itkImage.h"
 #include "itkImageRegistrationMethodv4Generic.h"
 
+#include "itkRegistrationParameterScalesFromJacobian.h"
+#include "itkRegistrationParameterScalesFromIndexShift.h"
+#include "itkRegistrationParameterScalesFromPhysicalShift.h"
 
 #include "itkCorrelationImageToImageMetricv4.h"
 #include "itkDemonsImageToImageMetricv4.h"
@@ -32,6 +35,7 @@ static const double defaultSigmas[] = {2.0,1.0,0.0};
 
 ImageRegistrationMethod::ImageRegistrationMethod()
   : m_Interpolator(sitkLinear),
+    m_OptimizerScalesType(Manual),
     m_MetricSamplingPercentage(1,1.0),
     m_MetricSamplingStrategy(NONE),
     m_ShrinkFactorsPerLevel(defaultShrinkFactors, defaultShrinkFactors+3),
@@ -189,10 +193,32 @@ ImageRegistrationMethod::SetOptimizerAsGradientDescent( double learningRate, uns
 ImageRegistrationMethod::Self&
 ImageRegistrationMethod::SetOptimizerScales( const std::vector<double> &scales)
 {
+  this->m_OptimizerScalesType = Manual;
   this->m_OptimizerScales = scales;
   return *this;
 }
 
+
+ImageRegistrationMethod::Self&
+ImageRegistrationMethod::SetOptimizeScalesFromJacobian()
+{
+  this->m_OptimizerScalesType = Jacobian;
+  return *this;
+}
+
+ImageRegistrationMethod::Self&
+ImageRegistrationMethod::SetOptimizeScalesFromIndexShift()
+{
+  this->m_OptimizerScalesType = IndexShift;
+  return *this;
+}
+
+ImageRegistrationMethod::Self&
+ImageRegistrationMethod::SetOptimizeScalesFromPhysicalShift()
+{
+  this->m_OptimizerScalesType = PhysicalShift;
+  return *this;
+}
 
 ImageRegistrationMethod::Self&
 ImageRegistrationMethod::SetMetricFixedMask( const Image &binaryMask )
@@ -299,6 +325,42 @@ ImageRegistrationMethod::CreateSpatialObjectMask(const Image &imageMask)
   return mask;
 }
 
+template <typename TMetric>
+ itk::RegistrationParameterScalesEstimator< TMetric >*
+ImageRegistrationMethod::CreateScalesEstimator()
+{
+  switch(m_OptimizerScalesType)
+    {
+    case Jacobian:
+    {
+      typedef RegistrationParameterScalesFromJacobian<TMetric> ScalesEstimatorType;
+      typename ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
+      scalesEstimator->Register();
+      return scalesEstimator;
+    }
+    case IndexShift:
+    {
+      typedef RegistrationParameterScalesFromIndexShift<TMetric> ScalesEstimatorType;
+      typename ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
+      scalesEstimator->Register();
+      return scalesEstimator;
+    }
+    case PhysicalShift:
+    {
+      typedef RegistrationParameterScalesFromPhysicalShift<TMetric> ScalesEstimatorType;
+      typename ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
+      scalesEstimator->Register();
+      return scalesEstimator;
+    }
+    case Manual:
+      return NULL;
+    default:
+      break; // fall through to exception
+    }
+  sitkExceptionMacro("LogicError: Unexpected case!");
+
+}
+
 
 Transform ImageRegistrationMethod::Execute ( const Image &fixed, const Image & moving )
 {
@@ -341,7 +403,8 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
   typename FixedImageType::ConstPointer fixed = this->CastImageToITK<FixedImageType>( inFixed );
   typename MovingImageType::ConstPointer moving = this->CastImageToITK<MovingImageType>( inMoving );
 
-  typename itk::ImageToImageMetricv4<FixedImageType, MovingImageType>::Pointer metric = this->CreateMetric<FixedImageType>();
+  typedef itk::ImageToImageMetricv4<FixedImageType, MovingImageType> MetricType;
+  typename MetricType::Pointer metric = this->CreateMetric<FixedImageType>();
   registration->SetMetric( metric );
   metric->UnRegister();
 
@@ -419,6 +482,20 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
   optimizer->UnRegister();
 
   registration->SetOptimizer( optimizer );
+
+  typename itk::RegistrationParameterScalesEstimator< MetricType >::Pointer scalesEstimator = this->CreateScalesEstimator<MetricType>();
+  if (scalesEstimator)
+    {
+    scalesEstimator->SetMetric( metric );
+    scalesEstimator->SetTransformForward( true );
+    optimizer->SetScalesEstimator( scalesEstimator );
+    }
+  else if ( m_OptimizerScales.size() )
+    {
+    itk::ObjectToObjectOptimizerBaseTemplate<double>::ScalesType scales(m_OptimizerScales.size());
+    std::copy( m_OptimizerScales.begin(), m_OptimizerScales.end(), scales.begin() );
+    optimizer->SetScales(scales);
+    }
 
   typename RegistrationType::InitialTransformType *itkTx;
   if ( !(itkTx = dynamic_cast<typename RegistrationType::InitialTransformType *>(this->m_Transform.GetITKBase())) )
