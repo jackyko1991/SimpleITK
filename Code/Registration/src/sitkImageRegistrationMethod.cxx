@@ -16,10 +16,7 @@ template< typename TValue, typename TType>
 itk::Array<TValue> sitkSTLVectorToITKArray( const std::vector< TType > & in )
 {
   itk::Array<TValue> out(in.size());
-  for( unsigned int i = 0; i < in.size(); ++i )
-    {
-    out[i] = in[i];
-    }
+  std::copy(in.begin(), in.end(), out.begin());
   return out;
 }
 
@@ -320,10 +317,9 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
     sitkExceptionMacro( "Unexpected error converting transform! Possible miss matching dimensions!" );
     }
 
-  // itkv4 copies to output
-  registration->SetTransform( itkTx );
+  bool ReuseExternalTransform = true;
+  registration->SetTransform( itkTx, ReuseExternalTransform );
 
-  //registration->SetInitialTransformParameters(itkTx->GetParameters());
 
 #if 0 //todo extra parameters
   if (m_FixedImageRegionSize.size() && m_FixedImageRegionIndex.size())
@@ -346,7 +342,6 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
 
   registration->Update();
 
-  registration->GetMetric()->Print(std::cout);
 
 #if 0 // todo feature
       // update measurements
