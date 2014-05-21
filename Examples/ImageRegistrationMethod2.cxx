@@ -86,11 +86,9 @@ int main(int argc, char *argv[])
   const double fixedImageStandardDeviation = 0.4;
   const double movingImageStandardDeviation = 0.4;
   const uint64_t numberOfSpatialSamples = uint64_t(numberOfPixels*0.01);
-  R.SetMetricAsMutualInformation( fixedImageStandardDeviation,
-                                  movingImageStandardDeviation,
-                                  numberOfSpatialSamples );
+  R.SetMetricAsJointHistogramMutualInformation( );
 
-  const double learningRate = 15;
+  const double learningRate = 100;
   const unsigned int numberOfIterations = 200;
   R.SetOptimizerAsGradientDescent( learningRate,  numberOfIterations );
 
