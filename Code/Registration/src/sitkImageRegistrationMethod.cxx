@@ -200,21 +200,21 @@ ImageRegistrationMethod::SetOptimizerScales( const std::vector<double> &scales)
 
 
 ImageRegistrationMethod::Self&
-ImageRegistrationMethod::SetOptimizeScalesFromJacobian()
+ImageRegistrationMethod::SetOptimizerScalesFromJacobian()
 {
   this->m_OptimizerScalesType = Jacobian;
   return *this;
 }
 
 ImageRegistrationMethod::Self&
-ImageRegistrationMethod::SetOptimizeScalesFromIndexShift()
+ImageRegistrationMethod::SetOptimizerScalesFromIndexShift()
 {
   this->m_OptimizerScalesType = IndexShift;
   return *this;
 }
 
 ImageRegistrationMethod::Self&
-ImageRegistrationMethod::SetOptimizeScalesFromPhysicalShift()
+ImageRegistrationMethod::SetOptimizerScalesFromPhysicalShift()
 {
   this->m_OptimizerScalesType = PhysicalShift;
   return *this;

@@ -91,9 +91,9 @@ namespace simple
                                          unsigned int numberOfIterations );
 
     Self& SetOptimizerScales( const std::vector<double> &scales);
-    Self& SetOptimizeScalesFromJacobian();
-    Self& SetOptimizeScalesFromIndexShift();
-    Self& SetOptimizeScalesFromPhysicalShift();
+    Self& SetOptimizerScalesFromJacobian();
+    Self& SetOptimizerScalesFromIndexShift();
+    Self& SetOptimizerScalesFromPhysicalShift();
 
 
 
