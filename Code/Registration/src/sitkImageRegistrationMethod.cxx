@@ -67,6 +67,12 @@ std::string  ImageRegistrationMethod::ToString() const
 
   out << Superclass::ToString();
 
+  if ( this->m_ActiveOptimizer )
+    {
+    out << "ActiveOptimizer:";
+    this->m_ActiveOptimizer->Print(out, 1);
+    }
+
   out << "  Interpolator: ";
   this->ToStringHelper(out, this->m_Interpolator);
   out << std::endl;
