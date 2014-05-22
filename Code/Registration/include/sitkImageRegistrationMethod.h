@@ -93,14 +93,20 @@ namespace simple
                                          double convergenceMinimumValue = 1e-6,
                                          unsigned int convergenceWindowSize = 10);
 
+    Self& SetOptimizerAsLBFGSB(double gradientConvergenceTolerance = 1e-5,
+                               unsigned int maximumNumberOfIterations = 500,
+                               unsigned int maximumNumberOfCorrections = 5,
+                               unsigned int maximumNumberOfFunctionEvaluations = 2000,
+                               double costFunctionConvergenceFactor = 1e+7,
+                               double lowerBound = std::numeric_limits<double>::min(),
+                               double upperBound = std::numeric_limits<double>::max());
+
     Self& SetOptimizerScales( const std::vector<double> &scales );
     Self& SetOptimizerScalesFromJacobian( unsigned int centralRegionRadius = 5 );
     Self& SetOptimizerScalesFromIndexShift( unsigned int centralRegionRadius = 5,
                                            double smallParameterVariation =  0.01 );
     Self& SetOptimizerScalesFromPhysicalShift( unsigned int centralRegionRadius = 5,
                                               double smallParameterVariation =  0.01 );
-
-
 
     Self& SetMetricFixedMask( const Image &binaryMask );
 
@@ -146,7 +152,7 @@ namespace simple
     template<class TImage>
     Transform ExecuteInternal ( const Image &fixed, const Image &moving );
 
-    itk::ObjectToObjectOptimizerBaseTemplate<double> *CreateOptimizer( );
+    itk::ObjectToObjectOptimizerBaseTemplate<double> *CreateOptimizer( unsigned int numberOfTransformParameters );
 
     template<unsigned int VDimension>
       itk::SpatialObject<VDimension> *CreateSpatialObjectMask(const Image &mask);
@@ -182,7 +188,8 @@ namespace simple
 
     // optimizer
     enum OptimizerType { RegularStepGradientDescent,
-                         GradientDescent
+                         GradientDescent,
+                         LBFGSB
     };
     OptimizerType m_OptimizerType;
     double m_OptimizerLearningRate;
@@ -191,6 +198,12 @@ namespace simple
     double m_OptimizerRelaxationFactor;
     double m_OptimizerConvergenceMinimumValue;
     unsigned int m_OptimizerConvergenceWindowSize;
+    double m_OptimizerGradientConvergenceTolerance;
+    unsigned int m_OptimizerMaximumNumberOfCorrections;
+    unsigned int m_OptimizerMaximumNumberOfFunctionEvaluations;
+    double m_OptimizerCostFunctionConvergenceFactor;
+    double m_OptimizerLowerBound;
+    double m_OptimizerUpperBound;
 
     enum OptimizerScalesType {
       Manual,
