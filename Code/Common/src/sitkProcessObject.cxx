@@ -120,10 +120,15 @@ std::string ProcessObject::ToString() const
 {
   std::ostringstream out;
 
+  out << "ActiveProcess: ";
   if( this->m_ActiveProcess)
     {
-    out << "ActiveProcess:" << std::endl;
+    out << "ActiveProcess: ";
     this->m_ActiveProcess->Print(out, 1);
+    }
+  else
+    {
+    out << " (NULL)" << std::endl;
     }
   return out.str();
 }
