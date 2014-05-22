@@ -77,10 +77,11 @@ namespace simple
       { return this->m_Transform; }
 
     Self& SetMetricAsCorrelation( );
-    Self& SetMetricAsDemons( );
-    Self& SetMetricAsJointHistogramMutualInformation( );
+    Self& SetMetricAsDemons( double intensityDifferenceThreshold = 0.001 );
+    Self& SetMetricAsJointHistogramMutualInformation( unsigned int numberOfHistogramBins = 20,
+                                                      double varianceForJointPDFSmoothing = 1.5);
     Self& SetMetricAsMeanSquares( );
-    Self& SetMetricAsMattesMutualInformation( );
+    Self& SetMetricAsMattesMutualInformation( unsigned int numberOfHistogramBins = 50 );
 
 
     Self& SetOptimizerAsRegularStepGradientDescent( double learningRate,
@@ -206,6 +207,9 @@ namespace simple
                       MattesMutualInformation
     };
     MetricType m_MetricType;
+    double m_MetricIntensityDifferenceThreshold;
+    unsigned int m_MetricNumberOfHistogramBins;
+    double m_MetricVarianceForJointPDFSmoothing;
 
     Image m_MetricFixedMaskImage;
     Image m_MetricMovingMaskImage;
