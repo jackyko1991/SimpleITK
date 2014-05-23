@@ -95,7 +95,8 @@ namespace simple
     Self& SetOptimizerAsRegularStepGradientDescent( double learningRate,
                                                     double minStep,
                                                     unsigned int numberOfIterations,
-                                                    double relaxationFactor=0.5);
+                                                    double relaxationFactor=0.5,
+                                                    double gradientMagnitudeTolerance = 1e-4);
     Self& SetOptimizerAsGradientDescent( double learningRate,
                                          unsigned int numberOfIterations,
                                          double convergenceMinimumValue = 1e-6,
@@ -209,6 +210,7 @@ namespace simple
     double m_OptimizerLineSearchEpsilon;
     unsigned int m_OptimizerLineSearchMaximumIterations;
     double m_OptimizerRelaxationFactor;
+    double m_OptimizerGradientMagnitudeTolerance;
     double m_OptimizerConvergenceMinimumValue;
     unsigned int m_OptimizerConvergenceWindowSize;
     double m_OptimizerGradientConvergenceTolerance;
