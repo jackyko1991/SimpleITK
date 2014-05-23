@@ -191,7 +191,7 @@ ImageRegistrationMethod::SetOptimizerAsConjugateGradientLineSearch( double learn
                                                                     double lineSearchEpsilon,
                                                                     unsigned int lineSearchMaximumIterations )
 {
-  m_OptimizerType = GradientDescent;
+  m_OptimizerType = ConjugateGradientLineSearch;
   m_OptimizerLearningRate = learningRate;
   m_OptimizerNumberOfIterations = numberOfIterations;
   m_OptimizerConvergenceMinimumValue = convergenceMinimumValue;
