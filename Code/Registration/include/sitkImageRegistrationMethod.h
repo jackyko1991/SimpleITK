@@ -118,6 +118,11 @@ namespace simple
                                double costFunctionConvergenceFactor = 1e+7,
                                double lowerBound = std::numeric_limits<double>::min(),
                                double upperBound = std::numeric_limits<double>::max());
+    Self& SetOptimizerAsQuasiNewton( double learningRate,
+                                     unsigned int numberOfIterations,
+                                     double convergenceMinimumValue = 1e-6,
+                                     unsigned int convergenceWindowSize = 10,
+                                     unsigned int maximumIterationsWithoutProgress = 30 );
 
     Self& SetOptimizerScales( const std::vector<double> &scales );
     Self& SetOptimizerScalesFromJacobian( unsigned int centralRegionRadius = 5 );
@@ -209,7 +214,8 @@ namespace simple
                          RegularStepGradientDescent,
                          GradientDescent,
                          GradientDescentLineSearch,
-                         LBFGSB
+                         LBFGSB,
+                         QuasiNewton
     };
     OptimizerType m_OptimizerType;
     double m_OptimizerLearningRate;
@@ -229,6 +235,7 @@ namespace simple
     double m_OptimizerCostFunctionConvergenceFactor;
     double m_OptimizerLowerBound;
     double m_OptimizerUpperBound;
+    unsigned int m_OptimizerMaximumIterationsWithoutProgress;
 
     enum OptimizerScalesType {
       Manual,

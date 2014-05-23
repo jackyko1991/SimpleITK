@@ -4,6 +4,8 @@
 #include "itkGradientDescentOptimizerv4.h"
 #include "itkRegularStepGradientDescentOptimizerv4.h"
 #include "itkLBFGSBOptimizerv4.h"
+#include "itkQuasiNewtonOptimizerv4.h"
+
 
 
 namespace {
@@ -152,6 +154,23 @@ namespace simple
       this->m_pfGetOptimizerIteration = nsstd::bind(&_OptimizerType::GetCurrentIteration,optimizer);
       this->m_pfGetOptimizerPosition = nsstd::bind(&PositionOptimizerCustomCast::CustomCast,optimizer);
 
+      return optimizer.GetPointer();
+      }
+    else if ( m_OptimizerType == QuasiNewton )
+      {
+      typedef itk::QuasiNewtonOptimizerv4Template<InternalComputationValueType> _OptimizerType;
+      _OptimizerType::Pointer      optimizer     = _OptimizerType::New();
+      optimizer->SetLearningRate( this->m_OptimizerLearningRate );
+      optimizer->SetNumberOfIterations( this->m_OptimizerNumberOfIterations );
+      optimizer->SetMinimumConvergenceValue( this->m_OptimizerConvergenceMinimumValue );
+      optimizer->SetConvergenceWindowSize( this->m_OptimizerConvergenceWindowSize );
+      optimizer->SetMaximumIterationsWithoutProgress( this->m_OptimizerMaximumIterationsWithoutProgress );
+
+      this->m_pfGetMetricValue = nsstd::bind(&_OptimizerType::GetCurrentMetricValue,optimizer);
+      this->m_pfGetOptimizerIteration = nsstd::bind(&_OptimizerType::GetCurrentIteration,optimizer);
+      this->m_pfGetOptimizerPosition = nsstd::bind(&PositionOptimizerCustomCast::CustomCast,optimizer);
+
+      optimizer->Register();
       return optimizer.GetPointer();
       }
     else

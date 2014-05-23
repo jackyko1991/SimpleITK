@@ -278,6 +278,23 @@ ImageRegistrationMethod::Self&
 }
 
 ImageRegistrationMethod::Self&
+ImageRegistrationMethod::SetOptimizerAsQuasiNewton( double learningRate,
+                                                    unsigned int numberOfIteratons,
+                                                    double convergenceMinimumValue,
+                                                    unsigned int convergenceWindowSize,
+                                                    unsigned int maximumIterationsWithoutProgress )
+{
+  m_OptimizerType = QuasiNewton;
+  m_OptimizerLearningRate = learningRate;
+  m_OptimizerNumberOfIterations = numberOfIteratons;
+  m_OptimizerConvergenceMinimumValue = convergenceMinimumValue;
+  m_OptimizerConvergenceWindowSize = convergenceWindowSize;
+  m_OptimizerMaximumIterationsWithoutProgress = maximumIterationsWithoutProgress;
+  return *this;
+}
+
+
+ImageRegistrationMethod::Self&
 ImageRegistrationMethod::SetOptimizerScales( const std::vector<double> &scales)
 {
   this->m_OptimizerScalesType = Manual;
@@ -535,7 +552,8 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
     {
     // todo implement ImageRegionSpatialObject
     }
-  else if ( m_MetricFixedMaskImage.GetSize() != zeroSize )
+  else if ( m_MetricFixedMaskImage.GetSize() != zeroSize
+            && m_MetricFixedMaskImage.GetDimension() == FixedImageType::ImageDimension )
     {
     std::cout << "m_MetricFixedMaskImage.GetSize(): " << m_MetricFixedMaskImage.GetSize() << std::endl;
     // const or non const?
@@ -548,7 +566,8 @@ Transform ImageRegistrationMethod::ExecuteInternal ( const Image &inFixed, const
     {
     // todo implement ImageRegionSpatialObject
     }
-  else if ( m_MetricMovingMaskImage.GetSize() != zeroSize )
+  else if ( m_MetricMovingMaskImage.GetSize() != zeroSize
+            && m_MetricMovingMaskImage.GetDimension() == MovingImageType::ImageDimension  )
     {
     typename SpatialObjectMaskType::Pointer movingMask = this->CreateSpatialObjectMask<ImageDimension>(m_MetricMovingMaskImage);
     movingMask->UnRegister();
