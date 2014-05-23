@@ -137,7 +137,8 @@ ImageRegistrationMethod::CreateMetric( )
     {
     case Correlation:
     {
-      typedef itk::JointHistogramMutualInformationImageToImageMetricv4< FixedImageType, MovingImageType > _MetricType;
+      typedef itk::CorrelationImageToImageMetricv4< FixedImageType, MovingImageType > _MetricType;
+
       typename _MetricType::Pointer metric = _MetricType::New();
       metric->Register();
       return metric.GetPointer();
