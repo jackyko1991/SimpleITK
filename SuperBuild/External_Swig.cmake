@@ -12,8 +12,8 @@ endif()
 
 if(NOT SWIG_DIR)
 
-  set(SWIG_TARGET_VERSION 2.0.12-1)
-  set(SWIG_DOWNLOAD_SOURCE_HASH "44af22bffb53d1795b0f5cb3bff5eb1a")
+  set(SWIG_TARGET_VERSION 3.0.1)
+  set(SWIG_DOWNLOAD_SOURCE_HASH "d8b7e02cfa4bdd32d3db71c1ad34fc39")
   set(SWIG_DOWNLOAD_WIN_HASH "439bc49355dc76490b3fe0dffac2774d")
 
 
@@ -74,7 +74,7 @@ if(NOT SWIG_DIR)
 
 
     ExternalProject_add(Swig
-      URL http://midas3.kitware.com/midas/api/rest?method=midas.bitstream.download&checksum=${SWIG_DOWNLOAD_SOURCE_HASH}&name=swig-${SWIG_TARGET_VERSION}.tar.gz
+      URL http://prdownloads.sourceforge.net/swig/swig-${SWIG_TARGET_VERSION}.tar.gz
       URL_MD5 ${SWIG_DOWNLOAD_SOURCE_HASH}
       CONFIGURE_COMMAND ${swig_CONFIGURE_COMMAND}
       DEPENDS "${Swig_DEPENDENCIES}"
