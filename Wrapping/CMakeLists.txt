@@ -94,8 +94,22 @@ if ( WRAP_PYTHON )
   SWIG_add_module ( SimpleITK python
     SimpleITK.i
     sitkPyCommand.cxx )
-  SWIG_link_libraries ( SimpleITK ${SimpleITK_LIBRARIES} ${PYTHON_LIBRARIES})
+  if(NOT PYTHON_DEBUG_LIBRARIES)
+    # if not debug libraries use the same ones, also add compilation
+    # definition to disable python debug, when not available in
+    # windows.
+    set(PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
+
+    # Added to SWIG 2.0.11 this compilation flag...
+    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/SimpleITKPYTHON_wrap.cxx  PROPERTIES COMPILE_DEFINITIONS SWIG_PYTHON_INTERPRETER_NO_DEBUG )
+  endif(NOT PYTHON_DEBUG_LIBRARIES)
+
+  SWIG_link_libraries ( SimpleITK ${SimpleITK_LIBRARIES}
+     general ${PYTHON_LIBRARIES}
+     optimized ${PYTHON_LIBRARIES}
+     debug ${PYTHON_DEBUG_LIBRARIES} )
   set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/SimpleITKPYTHON_wrap.cxx PROPERTIES COMPILE_FLAGS "-w")
+
   sitk_strip_target( ${SWIG_MODULE_SimpleITK_TARGET_NAME} )
 
   set(SWIG_MODULE_SimpleITKPython_TARGET_NAME "${SWIG_MODULE_SimpleITK_TARGET_NAME}")
