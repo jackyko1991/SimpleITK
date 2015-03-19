@@ -54,7 +54,7 @@ namespace itk
       else
         {
         allocateMemberFactory.GetMemberFunction( ValueEnum, 4 )( Width, Height, Depth, dim4, numberOfComponents );
-        } 
+        }
     }
   }
 }

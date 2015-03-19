@@ -413,7 +413,13 @@ TEST( IO, Image4D )
    */
 
   // Image
-  sitk::Image image = sitk::Image( 10, 11, 12, 13, sitk::sitkUInt8 );
+
+  std::vector<unsigned int> size(4);
+  size[0] = 10;
+  size[1] = 11;
+  size[2] = 12;
+  size[3] = 13;
+  sitk::Image image = sitk::Image( size, sitk::sitkUInt8 );
   sitk::Image imageRead;
 
   EXPECT_EQ( 10u, image.GetWidth() );
@@ -431,12 +437,13 @@ TEST( IO, Image4D )
   ASSERT_NO_THROW( imageRead = imageReader.Execute() );
 
   // VectorImage
-  sitk::Image vectorImage = sitk::Image( 10, 11, 12, 13, sitk::sitkVectorUInt8 );
+  sitk::Image vectorImage = sitk::Image( size, sitk::sitkVectorUInt8 );
   sitk::Image vectorImageRead;
 
   EXPECT_EQ( 10u, vectorImage.GetWidth() );
   EXPECT_EQ( 11u, vectorImage.GetHeight() );
   EXPECT_EQ( 12u, vectorImage.GetDepth() );
+  ASSERT_EQ( 4u, vectorImage.GetSize().size() );
   EXPECT_EQ( 13u, vectorImage.GetSize()[3] );
   EXPECT_EQ( 4u, vectorImage.GetNumberOfComponentsPerPixel() );
 

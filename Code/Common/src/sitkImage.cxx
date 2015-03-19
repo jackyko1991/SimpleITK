@@ -69,12 +69,6 @@ namespace itk
       Allocate ( Width, Height, Depth, 0, ValueEnum, 0 );
     }
 
-    Image::Image( unsigned int Width, unsigned int Height, unsigned int Depth, unsigned int dim4, PixelIDValueEnum ValueEnum )
-      : m_PimpleImage( NULL )
-    {
-      Allocate ( Width, Height, Depth, dim4, ValueEnum, 0 );
-    }
-
     Image::Image( const std::vector< unsigned int > &size, PixelIDValueEnum ValueEnum, unsigned int numberOfComponents )
       : m_PimpleImage( NULL )
     {

@@ -42,7 +42,7 @@
 
 const double adir[] = { 0.0,  0.0,  0.0, 1.0,
                        -1.0,  0.0,  0.0, 0.0,
-                        0.0, -1.0,  0.0, 0.0, 
+                        0.0, -1.0,  0.0, 0.0,
                         0.0,  0.0, -1.0, 0.0 };
 
 using  itk::simple::InstantiatedPixelIDTypeList;
@@ -194,10 +194,15 @@ TEST_F(Image4D,Constructors) {
   EXPECT_EQ ( 0u, image.GetWidth() );
   EXPECT_EQ ( 0u, image.GetHeight() );
   EXPECT_EQ ( 0u, image.GetDepth() );
-  EXPECT_EQ ( 0u, image.GetSize()[3] );
+  EXPECT_EQ ( 2u, image.GetSize().size() );
   }
 
-  itk::simple::Image image ( 64, 65, 66, 67, itk::simple::sitkUInt8 );
+  std::vector<unsigned int> s4d6(4);
+  s4d6[0] = 64;
+  s4d6[1] = 65;
+  s4d6[2] = 66;
+  s4d6[3] = 67;
+  itk::simple::Image image ( s4d6, itk::simple::sitkUInt8 );
   // EXPECT_EQ ( "08183e1b0c50fd2cf6f070b58e218443fb7d5317", hasher.SetHashFunction ( itk::simple::HashImageFilter::SHA1 ).Execute ( image ) ) << " SHA1 hash value sitkUInt8";
   result = typelist::IndexOf< InstantiatedPixelIDTypeList, itk::simple::BasicPixelID<unsigned char> >::Result;
   EXPECT_EQ ( image.GetPixelIDValue(), result );
@@ -209,7 +214,7 @@ TEST_F(Image4D,Constructors) {
   EXPECT_EQ ( 67u, image.GetSize()[3]  );
   EXPECT_EQ( image.GetDirection(), directionI4D );
 
-  image = itk::simple::Image ( 64, 65, 66, 67, itk::simple::sitkInt16 );
+  image = itk::simple::Image ( s4d6, itk::simple::sitkInt16 );
   // EXPECT_EQ ( "645b71695b94923c868e16b943d8acf8f6788617", hasher.SetHashFunction ( itk::simple::HashImageFilter::SHA1 ).Execute ( image ) ) << " SHA1 hash value sitkUInt16";
   result = typelist::IndexOf< InstantiatedPixelIDTypeList, itk::simple::BasicPixelID<short> >::Result;
   EXPECT_EQ ( image.GetPixelIDValue(), result );
@@ -222,7 +227,7 @@ TEST_F(Image4D,Constructors) {
   EXPECT_EQ( image.GetDirection(), directionI4D );
 
   // Test the constructors for vector images
-  std::vector<unsigned int> s4d(4, 5);
+ std::vector<unsigned int>  s4d(4, 5);
 
   image = itk::simple::Image( s4d, itk::simple::sitkVectorUInt8 );
   EXPECT_EQ ( image.GetDimension(), 4u );
@@ -257,7 +262,7 @@ TEST_F(Image4D,Constructors) {
   // these images, let just construct these types need todo better
   // testing!
 
-  image = itk::simple::Image ( 64, 65, 66, 67, itk::simple::sitkLabelUInt8 );
+  image = itk::simple::Image ( s4d6, itk::simple::sitkLabelUInt8 );
   EXPECT_EQ ( 64u, image.GetWidth() );
   EXPECT_EQ ( 65u, image.GetHeight() );
   EXPECT_EQ ( 66u, image.GetDepth() );
@@ -265,11 +270,11 @@ TEST_F(Image4D,Constructors) {
   EXPECT_EQ ( 1u, image.GetNumberOfComponentsPerPixel() );
   EXPECT_EQ( image.GetDirection(), directionI4D );
 
-  image = itk::simple::Image ( 64, 65, 66, 67, itk::simple::sitkLabelUInt16 );
+  image = itk::simple::Image ( s4d6, itk::simple::sitkLabelUInt16 );
 
-  image = itk::simple::Image ( 64, 65, 66, 67, itk::simple::sitkLabelUInt32 );
+  image = itk::simple::Image ( s4d6, itk::simple::sitkLabelUInt32 );
 
-  image = itk::simple::Image ( 64, 65, 66, 67, itk::simple::sitkVectorUInt8 );
+  image = itk::simple::Image ( s4d6, itk::simple::sitkVectorUInt8 );
 
   EXPECT_EQ ( 64u, image.GetWidth() );
   EXPECT_EQ ( 65u, image.GetHeight() );
@@ -277,7 +282,7 @@ TEST_F(Image4D,Constructors) {
   EXPECT_EQ ( 67u, image.GetSize()[3] );
   EXPECT_EQ ( 4u, image.GetNumberOfComponentsPerPixel() );
 
-  image = itk::simple::Image ( 64, 65, 66, 67, itk::simple::sitkVectorUInt16 );
+  image = itk::simple::Image ( s4d6, itk::simple::sitkVectorUInt16 );
   EXPECT_EQ ( 4u, image.GetNumberOfComponentsPerPixel() );
 
 }
@@ -396,15 +401,16 @@ namespace sitk = itk::simple;
 
 TEST_F(Image4D, CopyInformation)
 {
-
+  std::vector<unsigned int> s4d(4,10);
   sitk::Image img1d( 10, 20, sitk::sitkFloat32 );
-  sitk::Image img4d( 10, 10, 10, 10, sitk::sitkUInt32 );
+  sitk::Image img4d( s4d, sitk::sitkUInt32 );
 
   // number if dimension are different
   EXPECT_ANY_THROW( img1d.CopyInformation( img4d ) );
 
   // image sizes don't match
-  sitk::Image img4d2( 10, 10, 10, 20, sitk::sitkUInt16 );
+  s4d[3] = 20;
+  sitk::Image img4d2( s4d, sitk::sitkUInt16 );
   EXPECT_ANY_THROW( img4d.CopyInformation( img4d2 ) );
 
   // fix the size to match
@@ -421,8 +427,9 @@ TEST_F(Image4D, CopyInformation)
 
 TEST_F(Image4D, CopyOnWrite)
 {
+  std::vector<unsigned int> s4d(4,10);
   // test that a just constructed image only have 1 referecne
-  sitk::Image img( 10, 10, 10, 10, sitk::sitkUInt8 );
+  sitk::Image img( s4d, sitk::sitkUInt8 );
   EXPECT_EQ(static_cast<const sitk::Image *>(&img)->GetITKBase()->GetReferenceCount(), 1 )
     << " Reference Count for just constructed Image";
 
