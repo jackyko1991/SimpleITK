@@ -87,7 +87,7 @@ namespace itk {
       if ( dimension != 2 && dimension != 3 )
 #endif
         {
-        sitkExceptionMacro( "The file in the series have unsupported " << dimension - 1 << " dimensions." );
+        sitkExceptionMacro( "The file has unsupported " << dimension - 1 << " dimensions." );
         }
 
       if ( !this->m_MemberFactory->HasMemberFunction( type, dimension ) )
