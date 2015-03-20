@@ -407,11 +407,6 @@ TEST(IO, VectorImageSeriesWriter )
 
 TEST( IO, Image4D )
 {
-  /* TODO: 
-   * - Use 4D image from data repository (i.e. not generated from library itself)
-   * - Extend HashImageFilter to 4D and use hash to compare read/write image
-   */
-
   // Image
 
   std::vector<unsigned int> size(4);
@@ -429,12 +424,31 @@ TEST( IO, Image4D )
   EXPECT_EQ( 1u, image.GetNumberOfComponentsPerPixel() );
 
   sitk::ImageFileWriter imageWriter;
-  imageWriter.SetFileName( "image4d.nii" );
+  imageWriter.SetFileName( dataFinder.GetOutputDirectory()+"image4d.nii" );
   ASSERT_NO_THROW( imageWriter.Execute( image ) );
 
   sitk::ImageFileReader imageReader;
-  imageReader.SetFileName( "image4d.nii" );
+  imageReader.SetFileName( dataFinder.GetOutputDirectory()+"image4d.nii" );
   ASSERT_NO_THROW( imageRead = imageReader.Execute() );
+  EXPECT_EQ ( sitk::Hash( image ), sitk::Hash( imageRead ) );
+
+  sitk::Image imageRead2;
+  imageReader.SetFileName( dataFinder.GetFile( "Input/4D.nii.gz" ) );
+  ASSERT_NO_THROW( imageRead2 = imageReader.Execute() );
+  EXPECT_EQ ( "9e81d4b3cdf10a4da5d54c8cd7c4954449d76d5d", sitk::Hash( imageRead2 ) );
+
+  EXPECT_EQ( 36u, imageRead2.GetWidth() );
+  EXPECT_EQ( 48u, imageRead2.GetHeight() );
+  EXPECT_EQ( 21u, imageRead2.GetDepth() );
+  EXPECT_EQ( 4u, imageRead2.GetSize()[3] );
+
+  imageWriter.SetFileName( dataFinder.GetOutputDirectory()+"image4d2.nii" );
+  ASSERT_NO_THROW( imageWriter.Execute( imageRead2 ) );
+
+  sitk::Image imageRead3;
+  ASSERT_NO_THROW( imageRead3 = imageReader.Execute() );
+  imageReader.SetFileName( dataFinder.GetOutputDirectory()+"image4d2.nii" );
+  EXPECT_EQ ( "9e81d4b3cdf10a4da5d54c8cd7c4954449d76d5d", sitk::Hash( imageRead3 ) );
 
   // VectorImage
   sitk::Image vectorImage = sitk::Image( size, sitk::sitkVectorUInt8 );
@@ -454,6 +468,8 @@ TEST( IO, Image4D )
   sitk::ImageFileReader vectorImageReader;
   vectorImageReader.SetFileName( "image4d.nii" );
   ASSERT_NO_THROW( vectorImageRead = vectorImageReader.Execute() );
+
+  EXPECT_EQ ( sitk::Hash( vectorImage ), sitk::Hash( vectorImageRead ) );
 
 }
 
