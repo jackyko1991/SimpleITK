@@ -114,6 +114,10 @@ TEST_F(HashImageFilterTest, SHA1HashValues ) {
   this->CheckImageHashSHA1<short, 3>("Input/Ramp-Down-Short.nrrd", "4b0bd9dcf1f7d78101ce24da7f51de212f302ae9" );
 
   this->CheckImageHashSHA1<int, 3>("Input/Ramp-Down-Short.nrrd",  "3dc54908746f25fd42f17c5fe44935013e508b1b" );
+
+#ifdef SITK_4D_IMAGES
+  this->CheckImageHashSHA1<short, 4>("Input/4D.nii.gz", "9e81d4b3cdf10a4da5d54c8cd7c4954449d76d5d" );
+#endif
 }
 
 TEST_F(HashImageFilterTest, VectorImages ) {
