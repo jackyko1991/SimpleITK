@@ -86,6 +86,10 @@ TEST_F(HashImageFilterTest, InstantiateTest) {
   typedef itk::HashImageFilter< itk::Image<double, 3> > DOUBLEHasherType;
   EXPECT_TRUE( INT23HasherType::New().IsNotNull() );
 
+#ifdef SITK_4D_IMAGES
+  typedef itk::HashImageFilter< itk::Image<double, 4> > DOUBLE4DHasherType;
+  EXPECT_TRUE( DOUBLE4DHasherType::New().IsNotNull() );
+#endif
 };
 
 
