@@ -35,8 +35,11 @@ add_custom_command( TARGET ${SWIG_MODULE_SimpleITK_TARGET_NAME}
   )
 add_custom_command( TARGET ${SWIG_MODULE_SimpleITK_TARGET_NAME}
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/R_libs
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/SimpleITK.R ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/R/
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+  ${CMAKE_CURRENT_BINARY_DIR}/R_libs
+  ## Break the SimpleITK.R file into two parts - one for .onLoad and the other as SimpleITK.R.
+  ## This moves the tricky enumerations into part of the package that happens at load time
+  COMMAND ${R_COMMAND} --vanilla  --file=${CMAKE_CURRENT_BINARY_DIR}/Packaging/refactor_swig_script.R --args  ${CMAKE_CURRENT_BINARY_DIR}/SimpleITK.R ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/R/
   # copy sample images
   COMMAND ${CMAKE_COMMAND} -E copy ${SimpleITK_BINARY_DIR}/ExternalData/Testing/Data/Input/cthead1.png  ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/
   COMMAND ${CMAKE_COMMAND} -E copy ${SimpleITK_BINARY_DIR}/ExternalData/Testing/Data/Input/cthead1-Float.mha  ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/
