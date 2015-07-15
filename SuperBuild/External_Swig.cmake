@@ -15,6 +15,7 @@ if(NOT SWIG_DIR)
   set(SWIG_TARGET_VERSION 3.0.7)
   set(SWIG_DOWNLOAD_SOURCE_HASH "7fff46c84b8c630ede5b0f0827e3d90a")
   set(SWIG_DOWNLOAD_WIN_HASH "d8b5a9ce49c819cc1bfc1e797b85ba7a")
+  set(SWIG_REPOSITORY git://github.com/richardbeare/swig.git)
 
 
   if(WIN32)
@@ -56,7 +57,7 @@ if(NOT SWIG_DIR)
 
     # swig uses bison find it by cmake and pass it down
     find_package(BISON)
-    set(BISON_FLAGS "" CACHE STRING "Flags used by bison")
+    set(BISON_FLAGS "-y" CACHE STRING "Flags used by bison")
     mark_as_advanced( BISON_FLAGS)
 
 
@@ -73,14 +74,22 @@ if(NOT SWIG_DIR)
     set(swig_CONFIGURE_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/swig_configure_step.cmake)
 
 
+#    ExternalProject_add(Swig
+#      URL http://midas3.kitware.com/midas/api/rest?method=midas.bitstream.download&checksum=${SWIG_DOWNLOAD_SOURCE_HASH}&name=swig-${SWIG_TARGET_VERSION}.tar.gz
+#      URL_MD5 ${SWIG_DOWNLOAD_SOURCE_HASH}
+#      CONFIGURE_COMMAND ${swig_CONFIGURE_COMMAND}
+#      DEPENDS "${Swig_DEPENDENCIES}"
+
+#      )
+
+    set (SWIG_TAG_COMMAND GIT_TAG 3df786175e4370f88a3f74720d8dc0545cae27da)
     ExternalProject_add(Swig
-      URL http://midas3.kitware.com/midas/api/rest?method=midas.bitstream.download&checksum=${SWIG_DOWNLOAD_SOURCE_HASH}&name=swig-${SWIG_TARGET_VERSION}.tar.gz
-      URL_MD5 ${SWIG_DOWNLOAD_SOURCE_HASH}
+      GIT_REPOSITORY ${SWIG_REPOSITORY}
+      ${SWIG_TAG_COMMAND}
+      UPDATE_COMMAND ./autogen.sh
       CONFIGURE_COMMAND ${swig_CONFIGURE_COMMAND}
       DEPENDS "${Swig_DEPENDENCIES}"
-
-      )
-
+    )
     set(SWIG_DIR ${swig_install_dir}/share/swig/${SWIG_TARGET_VERSION})
     set(SWIG_EXECUTABLE ${swig_install_dir}/bin/swig)
 
