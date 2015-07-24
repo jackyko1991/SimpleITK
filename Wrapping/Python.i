@@ -593,6 +593,16 @@
 
 }
 
+%wrapper %{
+SWIGEXPORT itk::simple::Image * convertSwigSimpleITKImage( PyObject * pyObj )
+{
+  itk::simple::Image *img;
+  if (SWIG_ConvertPtr(pyObj, (void **) &img,  SWIGTYPE_p_itk__simple__Image, 0) == -1)
+    return NULL;
+  return img;
+}
+%}
+
 // This is included inline because SwigMethods (SimpleITKPYTHON_wrap.cxx)
 // is declared static.
 %{
