@@ -1,6 +1,12 @@
  // R specific swig components
 #if SWIGR
 
+
+%{
+#include "Rinternals.h"
+#include "sitkRCommand.h"
+%}
+
 // ignore overload methods of int type when there is an enum
 %ignore itk::simple::CastImageFilter::SetOutputPixelType( PixelIDValueType pixelID );
 %ignore itk::simple::GetPixelIDValueAsString( PixelIDValueType type );
@@ -19,6 +25,31 @@
 
 // some important enumerations don't get evaluate properly. This is a
 // hack to fix the problem.
+%feature("director") itk::simple::Command;
+
+%extend itk::simple::ProcessObject {
+ int AddCommand( itk::simple::EventEnum e, SEXP obj )
+ {
+   if (!Rf_isFunction(obj))
+     {
+     return 0;
+     }
+   itk::simple::RCommand *cmd = NULL;
+   try
+     {
+       cmd = new itk::simple::RCommand();
+       cmd->SetCallbackRCallable(obj);
+       int ret = self->AddCommand(e,*cmd);
+       cmd->OwnedByProcessObjectsOn();
+       return ret;
+     }
+   catch(...)
+     {
+       delete cmd;
+       throw;
+     }
+ }
+};
 
 %inline
 %{
@@ -26,7 +57,8 @@
 
   // causes swig problems
   //namespace sitk = itk::simple;
-
+// Enable Java classes derived from Command Execute method to be
+// called from C++
 
   // functions for image content access via bracket operator
   itk::simple::Image SingleBracketOperator(std::vector<int> xcoord, std::vector<int> ycoord, std::vector<int> zcoord, const itk::simple::Image src)
