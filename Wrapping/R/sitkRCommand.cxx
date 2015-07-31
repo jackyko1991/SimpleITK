@@ -17,8 +17,6 @@
  *=========================================================================*/
 
 // The python header defines _POSIX_C_SOURCE without a preceding #undef
-#undef _POSIX_C_SOURCE
-#undef _XOPEN_SOURCE
 #include <Rinternals.h>
 
 #include "sitkRCommand.h"
@@ -34,23 +32,35 @@ namespace simple
 
 
 RCommand::RCommand()
-  : m_Object(NULL)
+  : m_Object(R_NilValue)
 {
 }
 
 RCommand::~RCommand()
 {
   this->m_Object = NULL;
+  this->m_Environ = NULL;
 }
 
-void RCommand::SetCallbackRCallable(SEXP o)
+void RCommand::SetCallbackRCallable(SEXP obj)
 {
-  if (o != this->m_Object)
+  if (obj != this->m_Object)
     {
     // Don't think we have to do anything
     // fancy with references - R handles that internally??
     // store the new object
-    this->m_Object = o;
+    this->m_Object = obj;
+
+    }
+}
+void RCommand::SetCallbackREnviron(SEXP rho)
+{
+  if (rho != this->m_Environ)
+    {
+    // Don't think we have to do anything
+    // fancy with references - R handles that internally??
+    // store the new object
+    this->m_Environ = rho;
 
     }
 }
@@ -68,26 +78,11 @@ void RCommand::Execute()
     return;
     }
 
-  // make sure that the CommandCallable is in fact callable
-  if (!isFunction(this->m_Object))
-    {
-    // we throw a standard ITK exception: this makes it possible for
-    // our standard CableSwig exception handling logic to take this
-    // through to the invoking R process
-    sitkExceptionMacro(<<"R Callable is not a callable R object, "
-                       <<"or it has not been set.");
-    }
   else
     {
     SEXP result;
-
-    if ( !isEnvironment(FRAME(this->m_Object))) {
-    sitkExceptionMacro(<<"FRAME is not the right way to get a function environment,");
-
-    }
-
-    result = eval(this->m_Object, FRAME(this->m_Object));
-
+    // retrieve the environment for passing to eval
+    result = eval(this->m_Object, this->m_Environ);
     }
 }
 

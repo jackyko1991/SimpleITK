@@ -3,7 +3,6 @@
 
 
 %{
-#include "Rinternals.h"
 #include "sitkRCommand.h"
 %}
 
@@ -23,25 +22,33 @@
 // and for unsigned int vectors
 %typemap("rtype") std::vector<unsigned int>, std::vector<unsigned int> *, std::vector<unsigned int> & "integer";
 
-// some important enumerations don't get evaluate properly. This is a
-// hack to fix the problem.
+
 %feature("director") itk::simple::Command;
 
 %extend itk::simple::ProcessObject {
- int AddCommand( itk::simple::EventEnum e, SEXP obj )
+  int AddRCommand( itk::simple::EventEnum e, SEXP obj )
  {
+   // make sure that the CommandCallable is in fact callable
    if (!Rf_isFunction(obj))
      {
+           sitkExceptionMacro(<<"R object is not a function, "
+                              <<"or it has not been set.");
      return 0;
      }
    itk::simple::RCommand *cmd = NULL;
    try
      {
+
+       // set up expression for evaluation
+       SEXP R_fcall;
+       R_fcall = PROTECT(Rf_lang1(obj));
        cmd = new itk::simple::RCommand();
-       cmd->SetCallbackRCallable(obj);
+       cmd->SetCallbackRCallable(R_fcall);
+       cmd->SetCallbackREnviron(CLOENV(obj));
+       UNPROTECT(1);
        int ret = self->AddCommand(e,*cmd);
        cmd->OwnedByProcessObjectsOn();
-       return ret;
+       return 0;
      }
    catch(...)
      {

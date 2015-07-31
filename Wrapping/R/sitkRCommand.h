@@ -41,6 +41,9 @@ namespace simple
  * which was based on the WrapITK itkPyCommand class originally contributed by
  * Charl P. Botha <cpbotha |AT| ieee.org>.
  */
+
+#include "Rinternals.h"
+
 class RCommand
   : public itk::simple::Command
 {
@@ -58,6 +61,7 @@ public:
    * to make sure the Callable sticks around.
    */
   void SetCallbackRCallable(SEXP obj);
+  void SetCallbackREnviron(SEXP rho);
 
   SEXP GetCallbackRCallable();
 
@@ -78,6 +82,7 @@ protected:
 
 private:
   SEXP m_Object;
+  SEXP m_Environ;
 };
 
 } // namespace simple
