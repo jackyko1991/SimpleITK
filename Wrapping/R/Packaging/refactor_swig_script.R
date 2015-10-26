@@ -8,6 +8,9 @@
 ## The second file contains all the rest, and is written in to the
 ## package R directory
 
+## In addition we also get rid of the attr(,'inputTypes'), attr(,'returnType')
+## entries that don't seem to be used.
+
 # arguments after --args
 arguments <- commandArgs( TRUE )
 
@@ -27,6 +30,17 @@ splitSwigFile <- function(filename, onloadfile, mainfile)
     return (is.call(X) & (X[[1]]=="defineEnumeration"))
   }
 
+  getFuncAttr <- function(X)
+  {
+  if (is.call(X) & X[[1]] == '=') {
+        lhs <- X[[2]]
+        if (length(lhs) < 2) return(FALSE)
+        if ( (lhs[[1]]=='attr')) {
+           return ((lhs[[3]] == 'inputTypes') | (lhs[[3]] == 'returnType'))
+        }
+    }
+  return(FALSE)
+  }
   dd <- sapply(p1, getdefineEnum)
 
   enums <- p1[dd]
@@ -36,6 +50,10 @@ splitSwigFile <- function(filename, onloadfile, mainfile)
   enums <- c(".onLoad <- function(libname, pkgname) {", enums, "}")
 
   everythingelse <- p1[!dd]
+
+  attrstuff <- sapply(everythingelse, getFuncAttr)
+  everythingelse <- everythingelse[!attrstuff]
+
   everythingelse <- unlist(lapply(everythingelse, deparse))
   writeLines(everythingelse, mainfile)
   writeLines(enums, onloadfile)

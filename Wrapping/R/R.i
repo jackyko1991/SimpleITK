@@ -22,6 +22,17 @@
 // and for unsigned int vectors
 %typemap("rtype") std::vector<unsigned int>, std::vector<unsigned int> *, std::vector<unsigned int> & "integer";
 
+// We don't want a new pointer created for sitk class methods returning
+// self references. That seems to lead to garbage collection
+// problems.
+// This might be too aggressive -see how we go.
+%typemap(out,noblock=1) SWIGTYPE &  %{  %}
+// This slightly abuses the use of scoerceout, but it is the
+// simplest way to create an invisible return.
+%typemap(scoerceout) SWIGTYPE &
+%{ invisible(NULL) ; %}
+
+// if this breaks something occasionally, we can explicitly turn on those cases here
 
 %feature("director") itk::simple::Command;
 
