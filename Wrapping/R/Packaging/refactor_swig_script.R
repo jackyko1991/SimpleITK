@@ -47,7 +47,7 @@ splitSwigFile <- function(filename, onloadfile, mainfile)
   enums <- unlist(lapply(enums, deparse))
 
   ## put the function def around this
-  enums <- c(".onLoad <- function(libname, pkgname) {", enums, "}")
+  enums <- c(".onLoad <- function(libname, pkgname) {", enums, " \n createPixLookup()\n}")
 
   everythingelse <- p1[!dd]
 
