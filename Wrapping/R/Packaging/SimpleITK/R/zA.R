@@ -15,7 +15,7 @@ enumFromInteger = function(i, type) {
 
 
 ## Set up a map of functions for getting single voxels
-createPixLookup <- function()
+createPixLookup <- function( where = topenv(parent.frame()))
 {
     m <- get(".__E___itk__simple__PixelIDValueEnum")
     # get rid of unknown type - can't access anyway. There will be errors if
@@ -28,9 +28,11 @@ createPixLookup <- function()
     ff <- gsub("AsFloat32$", "AsFloat", ff)
     ff <- gsub("AsFloat64$", "AsDouble", ff)
 
-    sitkPixelAccessMap <-  mget(ff, ifnotfound=rep(NA,length(ff)))
+    
+    sitkPixelAccessMap <-  mget(ff, envir=where,
+                                ifnotfound=rep(NA,length(ff)))
     names(sitkPixelAccessMap) <- n
-    assign("sitkPixelAccessMap", sitkPixelAccessMap, envir=topenv(parent.frame()))
+    assign("sitkPixelAccessMap", sitkPixelAccessMap, envir=where)
 }
 
                                         # experimental bracket operator for images
@@ -75,7 +77,7 @@ setMethod('[', "_p_itk__simple__Image",
               ## return a single point
               pixtype <- x$GetPixelID()
               aF <- sitkPixelAccessMap[[pixtype]]
-              if (!is.na(aF)) {
+              if (inherits(aF, "SWIGFunction")) {
                 ## need to check whether we are using R or C indexing.
                 return(aF(x, c(i, j,k)))
               } else {
