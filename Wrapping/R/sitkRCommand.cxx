@@ -83,6 +83,10 @@ void RCommand::Execute()
     SEXP result;
     // retrieve the environment for passing to eval
     result = eval(this->m_Object, this->m_Environ);
+    if (result == NULL)
+      sitkExceptionMacro(<<"There was an error executing the "
+                         <<"R Callable.");
+
     }
 }
 
