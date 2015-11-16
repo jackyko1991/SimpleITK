@@ -17,13 +17,11 @@
  *=========================================================================*/
 
 // The python header defines _POSIX_C_SOURCE without a preceding #undef
+#include <iostream>
 #include <Rinternals.h>
 
 #include "sitkRCommand.h"
 #include "sitkExceptionObject.h"
-
-#include <iostream>
-
 
 namespace itk
 {
