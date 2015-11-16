@@ -20,23 +20,23 @@ set_source_files_properties(${swig_generated_file_fullname} PROPERTIES COMPILE_F
 get_target_property( SIMPLEITKR_BINARY_MODULE ${SWIG_MODULE_SimpleITK_TARGET_NAME} LOCATION )
 file(TO_NATIVE_PATH "${SIMPLEITKR_BINARY_MODULE}" SIMPLEITKR_NATIVE_BINARY_MODULE )
 
-# download sample images, if allowed
 
-if(NOT SITK_FORBID_DOWNLOADS)
-include(ExternalData)
-
+# set the output directory for the R library to the binary packaging location
+set_target_properties( ${SWIG_MODULE_SimpleITK_TARGET_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/src/)
 
 set(ExternalData_URL_TEMPLATES  "http://midas3.kitware.com/midas/api/rest?method=midas.bitstream.download&checksum=%(hash)&algorithm=%(algo)"
       "https://midas3.kitware.com/midas/api/rest?method=midas.bitstream.download&checksum=%(hash)&algorithm=%(algo)"
       "http://www.itk.org/files/ExternalData/%(algo)/%(hash)"
     )
+sitk_strip_target( ${SWIG_MODULE_SimpleITK_TARGET_NAME} )
+set(SWIG_MODULE_SimpleITKR_TARGET_NAME "${SWIG_MODULE_SimpleITK_TARGET_NAME}")
 
-  file( GLOB_RECURSE content_links
-    RELATIVE "${SimpleITK_SOURCE_DIR}" "Testing/Data/*.md5" )
+# download sample images, if allowed
 
-  #foreach(link  ${SimpleITK_SOURCE_DIR}/Testing/Data/Input/cthead1.png.md5  ${SimpleITK_SOURCE_DIR}/Testing/Data/Input/cthead1-Float.mha.md5)
-  foreach(link ${content_links})
+if(NOT SITK_FORBID_DOWNLOADS)
+  include(sitkExternalData)
 
+  foreach(link  ${SimpleITK_SOURCE_DIR}/Testing/Data/Input/cthead1.png.md5  ${SimpleITK_SOURCE_DIR}/Testing/Data/Input/cthead1-Float.mha.md5)
     string( REGEX REPLACE "\\.md5$" "" link ${link} )
     ExternalData_Expand_Arguments( SimpleITKRpackageData
       link_location
@@ -48,10 +48,20 @@ set(ExternalData_URL_TEMPLATES  "http://midas3.kitware.com/midas/api/rest?method
   endif()
 endif()
 
-# set the output directory for the R library to the binary packaging location
-set_target_properties( ${SWIG_MODULE_SimpleITK_TARGET_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/src/)
+## set up folders
+file(COPY ${SimpleITK_SOURCE_DIR}/Wrapping/R/Packaging DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/R_libs)
 
-sitk_strip_target( ${SWIG_MODULE_SimpleITK_TARGET_NAME} )
+if(NOT SITK_FORBID_DOWNLOADS)
+  # copy sample images - used in vignette/notebooks
+  ## can't use file(copy as the sources are symbolic links
+  add_custom_command( TARGET ${SWIG_MODULE_SimpleITKR_TARGET_NAME}
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${SimpleITK_BINARY_DIR}/ExternalData/Testing/Data/Input/cthead1.png ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/
+    COMMAND ${CMAKE_COMMAND} -E copy ${SimpleITK_BINARY_DIR}/ExternalData/Testing/Data/Input/cthead1-Float.mha ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/
+    )
+endif()
 
 # copy the R files a binary package
 add_custom_command( TARGET ${SWIG_MODULE_SimpleITK_TARGET_NAME}
@@ -59,7 +69,6 @@ add_custom_command( TARGET ${SWIG_MODULE_SimpleITK_TARGET_NAME}
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${SimpleITK_SOURCE_DIR}/Wrapping/R/Packaging ${CMAKE_CURRENT_BINARY_DIR}/Packaging
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/
   )
-set(COMMAND_DOWNLOADS "")
 
 add_custom_command( TARGET ${SWIG_MODULE_SimpleITK_TARGET_NAME}
   POST_BUILD
@@ -67,14 +76,7 @@ add_custom_command( TARGET ${SWIG_MODULE_SimpleITK_TARGET_NAME}
   ## Break the SimpleITK.R file into two parts - one for .onLoad and the other as SimpleITK.R.
   ## This moves the tricky enumerations into part of the package that happens at load time
   COMMAND ${R_COMMAND} --vanilla  --file=${CMAKE_CURRENT_BINARY_DIR}/Packaging/refactor_swig_script.R --args  ${CMAKE_CURRENT_BINARY_DIR}/SimpleITK.R ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/R/
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/R_libs
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/SimpleITK.R ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/R/
-
-  if( NOT SITK_FORBID_DOWNLOADS)
-    # copy sample images
-    COMMAND ${CMAKE_COMMAND} -E copy ${SimpleITK_BINARY_DIR}/ExternalData/Testing/Data/Input/cthead1.png  ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/
-    COMMAND ${CMAKE_COMMAND} -E copy ${SimpleITK_BINARY_DIR}/ExternalData/Testing/Data/Input/cthead1-Float.mha  ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK/data/
-  endif()
+  
   # install for running tests and create binary package
   COMMAND ${R_COMMAND} CMD INSTALL --build ${CMAKE_CURRENT_BINARY_DIR}/Packaging/SimpleITK --library=${CMAKE_CURRENT_BINARY_DIR}/R_libs
   COMMENT "Installing R package for testing and building binary version for distribution"
