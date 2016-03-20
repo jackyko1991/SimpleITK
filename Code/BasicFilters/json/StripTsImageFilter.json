@@ -1,0 +1,31 @@
+{
+  "name" : "StripTsImageFilter",
+  "template_code_filename" : "DualImageFilter",
+  "template_test_filename" : "ImageFilter",
+  "number_of_inputs" : 0,
+  "pixel_types" : "BasicPixelIDTypeList",
+  "pixel_types2" : "typename typelist::MakeTypeList<BasicPixelID<int8_t> >::Type",
+  "output_image_type" : "itk::Image< uint8_t, 3 >",
+  "filter_type" : "itk::StripTsImageFilter<itk::Image<typename InputImageType::PixelType, 3>, itk::Image<typename InputImageType2::PixelType, 3>, OutputImageType >",
+  "inputs" : [
+    {
+      "name" : "Input",
+      "type" : "Image"
+    },
+    {
+      "name" : "AtlasImage",
+      "type" : "Image",
+      "custom_itk_cast" : "filter->SetAtlasImage( this->CastImageToITK<typename FilterType::AtlasImageType>(*inAtlasImage) );"
+    },
+    {
+      "name" : "AtlasBrainMask",
+      "type" : "Image",
+      "custom_itk_cast" : "filter->SetAtlasBrainMask( this->CastImageToITK<typename FilterType::AtlasLabelType>(*inAtlasBrainMask) );"
+    }
+  ],
+  "members" : [],
+  "measurements" : [],
+  "tests" : [],
+  "briefdescription" : "composite ITK filter for automatic skull-stripping",
+  "detaileddescription" : "This ITK filter performs automatic skull stripping for 3D medical images\n\nIt requires 3 inputs: SetInput() SetAtlasImage() SetAtlasBrainMask() and it outputs the brain mask for the patient image\n\n\\warning images have to be 3D\n\nto be done: check if all required inputs are set and if images are 3D\n\nversion: 1.0 date: 20.04.2012 initial release\n\nStefan Bauer Institute for Surgical Technology and Biomechanics, University of Bern stefan.bauer at istb.unibe.ch\n\nThis code is from the Insight Journal paper: \"A Skull-Stripping Filter for ITK\" Bauer S., Fejes T., Reyes M. http://hdl.handle.net/10380/3353 Based on the paper: \"Skull-stripping for Tumor-bearing Brain Images\". Stefan Bauer, Lutz-Peter Nolte, and Mauricio Reyes. In Annual Meeting of the Swiss Society for Biomedical Engineering, page 2, Bern, April 2011.."
+}
