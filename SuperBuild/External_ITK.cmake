@@ -67,6 +67,7 @@ ExternalProject_Add(${proj}
   -DITK_LEGACY_REMOVE:BOOL=ON
   -DITK_BUILD_DEFAULT_MODULES:BOOL=ON
   -DModule_ITKReview:BOOL=ON
+  -DModule_SkullStrip:BOOL=ON
   -DITK_WRAP_float:BOOL=ON
   -DITK_WRAP_unsigned_char:BOOL=ON
   -DITK_WRAP_signed_short:BOOL=ON
