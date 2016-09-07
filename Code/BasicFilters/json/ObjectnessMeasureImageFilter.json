@@ -1,0 +1,68 @@
+{
+  "name" : "ObjectnessMeasureImageFilter",
+  "template_code_filename" : "ImageFilter",
+  "template_test_filename" : "ImageFilter",
+  "doc" : "",
+  "number_of_inputs" : 1,
+  "pixel_types" : "RealPixelIDTypeList",
+  "members" : [
+    {
+      "name" : "ObjectDimension",
+      "type" : "unsigned int",
+      "default" : "1"
+    },
+    {
+      "name" : "BrightObject",
+      "type" : "bool",
+      "default" : "false"
+    },
+    {
+      "name" : "Alpha",
+      "type" : "double",
+      "default" : "0.5"
+    },
+    {
+      "name" : "Beta",
+      "type" : "double",
+      "default" : "0.5"
+    },
+    {
+      "name" : "Gamma",
+      "type" : "double",
+      "default" : "5.0"
+    },
+    {
+      "name" : "ScaleObjectnessMeasure",
+      "type" : "bool",
+      "default" : "false"
+    }
+  ],
+  "tests" : [
+    {
+      "tag" : "1D",
+      "description" : "Simply run with default settings",
+      "settings" : [],
+      "tolerance" : 0.0001,
+      "inputA_cast" : "sitkFloat32",
+      "inputs" : [
+        "Input/DSA.png"
+      ]
+    },
+    {
+      "tag" : "blobs",
+      "description" : "detect blob features",
+      "settings" : [
+        {
+          "parameter" : "ObjectDimension",
+          "cxx_value" : "0u",
+          "value" : "0"
+        }
+      ],
+      "tolerance" : 0.0001,
+      "inputA_cast" : "sitkFloat32",
+      "inputs" : [
+        "Input/DSA.png"
+      ]
+    }
+  ]
+}
