@@ -42,7 +42,7 @@ if("${git_protocol}" STREQUAL "git")
 endif()
 
 # NOTE: it is very important to update the ITK_DIR path with the ITK version
-set(ITK_TAG_COMMAND GIT_TAG 80178ae516db87aa50d2883c4e090da92c4a502d ) # just before 4.10.1 release
+set(ITK_TAG_COMMAND GIT_TAG ccdbd3391500302875014308e5a8cd6cf2797960 )
 
 if( ${ITK_WRAPPING} OR ${BUILD_SHARED_LIBS} )
   set( ITK_BUILD_SHARED_LIBS ON )
@@ -100,5 +100,5 @@ ExternalProject_Add(${proj}
 
 
 ExternalProject_Get_Property(ITK install_dir)
-set(ITK_DIR "${install_dir}/lib/cmake/ITK-4.10" )
+set(ITK_DIR "${install_dir}/lib/cmake/ITK-4.11" )
 set(WrapITK_DIR "${ITK_DIR}/WrapITK")
