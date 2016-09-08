@@ -366,6 +366,11 @@ endif()
 
 
 
+set(ITKExternalModule_DEPENDENCIES ITK)
+include(External_ITKExternalModule)
+list(APPEND ${CMAKE_PROJECT_NAME}_DEPENDENCIES ITKExternalModule)
+
+
 get_cmake_property( _varNames VARIABLES )
 
 foreach (_varName ${_varNames})
