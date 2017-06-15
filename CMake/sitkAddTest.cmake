@@ -57,10 +57,10 @@ function(sitk_add_python_test name)
     ${ARGN}
     )
   set_property(TEST Python.${name}
-      PROPERTY LABELS Python
+      APPEND PROPERTY LABELS Python
       )
   set_property(TEST Python.${name}
-      PROPERTY ENVIRONMENT SITK_NOSHOW=YES
+      APPEND PROPERTY ENVIRONMENT SITK_NOSHOW=YES
       )
   if (NOT SimpleITK_PYTHON_USE_VIRTUALENV)
     set_property(TEST Python.${name}
@@ -94,10 +94,10 @@ function(sitk_add_lua_test name)
     ${ARGN}
     )
   set_property(TEST Lua.${name}
-    PROPERTY LABELS Lua
+    APPEND PROPERTY LABELS Lua
     )
   set_property(TEST Lua.${name}
-    PROPERTY ENVIRONMENT LUA_CPATH=$<TARGET_FILE:SimpleITKLuaModule_LUA>
+    APPEND PROPERTY ENVIRONMENT LUA_CPATH=$<TARGET_FILE:SimpleITKLuaModule_LUA>
     )
   set_property(TEST Lua.${name}
     APPEND PROPERTY ENVIRONMENT SITK_NOSHOW=YES
@@ -128,10 +128,10 @@ function(sitk_add_ruby_test name)
     ${ARGN}
     )
   set_property(TEST Ruby.${name}
-    PROPERTY LABELS Ruby
+    APPEND PROPERTY LABELS Ruby
     )
   set_property(TEST Ruby.${name}
-    PROPERTY ENVIRONMENT RUBYLIB=$<TARGET_FILE_DIR:simpleitk_RUBY>
+    APPEND PROPERTY ENVIRONMENT RUBYLIB=$<TARGET_FILE_DIR:simpleitk_RUBY>
     )
 endfunction()
 
@@ -159,7 +159,7 @@ function(sitk_add_tcl_test name)
     ${ARGN}
     )
   set_property(TEST Tcl.${name}
-    PROPERTY LABELS Tcl
+    APPEND PROPERTY LABELS Tcl
     )
 endfunction()
 
@@ -215,7 +215,7 @@ function(sitk_add_java_test name java_file)
     ${ARGN}
     )
   set_property(TEST Java.${name}
-    PROPERTY LABELS Java
+    APPEND PROPERTY LABELS Java
     )
 endfunction()
 
@@ -243,10 +243,10 @@ function(sitk_add_r_test name)
     ${ARGN}
     )
   set_property(TEST R.${name}
-    PROPERTY LABELS R
+    APPEND PROPERTY LABELS R
     )
   set_property(TEST R.${name}
-    PROPERTY ENVIRONMENT R_LIBS=${SimpleITK_BINARY_DIR}/Wrapping/R/R_libs/
+    APPEND PROPERTY ENVIRONMENT R_LIBS=${SimpleITK_BINARY_DIR}/Wrapping/R/R_libs/
     )
 endfunction()
 
@@ -302,6 +302,6 @@ function(sitk_add_csharp_test name csharp_file)
       )
   endif()
   set_property(TEST CSharp.${name}
-    PROPERTY LABELS CSharp
+    APPEND PROPERTY LABELS CSharp
     )
 endfunction()
