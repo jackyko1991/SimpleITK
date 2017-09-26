@@ -21,6 +21,7 @@
 #include <sitkCommand.h>
 #include <sitkFunctionCommand.h>
 #include <sitkCastImageFilter.h>
+#include <sitkUnaryMinusImageFilter.h>
 
 #include <sitkKernel.h>
 
@@ -280,7 +281,10 @@ TEST( ProcessObject, DeleteCommandActiveProcess )
     virtual void Execute( )
       {
         if ( m_Process.GetProgress() >= m_AbortAt )
+          {
           delete m_Cmd;
+          m_Cmd = SITK_NULLPTR;
+          }
       }
 
     float m_AbortAt;
@@ -331,8 +335,8 @@ TEST( ProcessObject, RemoveAllCommandsActiveProcess )
     float m_AbortAt;
   };
 
-  sitk::CastImageFilter po;
-  sitk::Image img(100,100,100, sitk::sitkUInt16);
+  sitk::UnaryMinusImageFilter po;
+  sitk::Image img(100,100,100, sitk::sitkInt16);
 
   sitk::Command cmd1;
   RemoveAllCommandsAtCommand cmd2(po, .01f);
